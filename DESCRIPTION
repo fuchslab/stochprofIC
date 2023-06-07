@@ -1,0 +1,21 @@
+Package: pipeline
+Title: Run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data
+Version: 0.1
+Authors@R: 
+    person("Mercè", "Garí", , "mercegari@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6903-0732"))
+Description: Development of a pipeline to detect/parameterize transcriptional heterogeneity of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, in order to obtain a the corrected data.
+Depends:
+  dplyr (>= 1.0.0),
+  tibble,
+  tidyselect,
+  gamlss,
+  mutoss
+Suggests:
+  knitr,
+  rmarkdown
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+VignetteBuilder: knitr
