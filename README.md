@@ -1,6 +1,6 @@
-# pipeline
+# stochprofIC
 
-pipeline is a tool to run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.
+stochprofIC is a tool to run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.
 
 Creator:
 
@@ -16,6 +16,6 @@ Contributors:
 
 To install or update, run:
 ```
-devtools::install_github("mercegari/pipeline")
+devtools::install_github("mercegari/stochprofIC")
 ```
 
