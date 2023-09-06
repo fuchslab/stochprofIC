@@ -16,6 +16,6 @@ Contributors:
 
 To install or update, run:
 ```
-devtools::install_github("mercegari/stochprofIC")
+devtools::install_github("fuchslab/stochprofIC")
 ```
 
