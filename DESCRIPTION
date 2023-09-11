@@ -10,7 +10,9 @@ Depends:
   tibble,
   tidyselect,
   gamlss,
-  mutoss
+  mutoss,
+  tidyr,
+  stringr
 Suggests:
   knitr,
   rmarkdown
