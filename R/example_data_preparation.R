@@ -5,11 +5,16 @@
 # This file contains two examples on how to transform the original data in csv
 # into a tidy long format data suitable for the functions in the package
 
+#required packages
+require(magrittr)
+require(dplyr)
+require(tidyverse)
+
 #----------------------------------- EXAMPLE BREAST CANCER
 # Load original data for breast cancer
 # Rename the variable "symbol" that contains the genes into "gene"
 # Select only the "gene" variable and samples with RSEM data
-bc <- read.csv("../data/GSE147356_2020_02_06_breastcancer_allcompiled.csv") %>%
+bc <- read.csv("data/GSE147356_2020_02_06_breastcancer_allcompiled.csv") %>%
   rename(gene = symbol) %>%
   mutate(gene = as.factor(gene)) %>%
   dplyr::select(-c(ensgene, entrez, chr, start, end, strand, biotype, description))
@@ -35,19 +40,19 @@ breast.cancer <- bc %>%
   ungroup()
 
 # Save tidy dataset in the long format for subsequent steps
-save(breast.cancer, file="breast-cancer-data-ready-to-pipeline.RData")
+save(breast.cancer, file="data/breast-cancer-data-ready-to-pipeline.RData")
 
 #----------------------------------- EXAMPLE GLIOMA
 # Load original data for glioma
 # Rename the variable "symbol" that contains the genes into "gene"
 # Select only the "gene" variable and samples with RSEM data
-gl <- read.csv("../data/GSE147360_2020_03_20_opc_allcompiled.csv") %>%
+gl <- read.csv("data/GSE147360_2020_03_20_opc_allcompiled.csv") %>%
   rename(gene = symbol) %>%
   mutate(gene = as.factor(gene)) %>%
   dplyr::select(-c(ensgene, entrez, chr, start, end, strand, biotype, description))
 
 # Load metadata for glioma with info on Sex, Time and Type of sample
-meta <- read.csv("GSE147360-GPL19057_series_matrix.txt", skip=29, sep="\t") %>%
+meta <- read.csv("data/GSE147360-GPL19057_series_matrix.txt", skip=29, sep="\t") %>%
   filter(X.Sample_title == "!Sample_characteristics_ch1") %>%
   tibble() %>%
   dplyr::select(-X.Sample_title) %>%
@@ -93,4 +98,4 @@ glioma <- gl %>%
   ungroup()
 
 # Save tidy dataset in the long format for subsequent steps
-save(glioma, file="glioma-data-ready-to-pipeline.RData")
+save(glioma, file="data/glioma-data-ready-to-pipeline.RData")
