@@ -18,7 +18,7 @@ run.gamlss <- function(d = d,
                        log = NULL, trim = NULL, 
                        zeros = NULL, zero.value = NULL, add.1 = NULL,
                        re = NA, re.placement = "both") {
-
+  
   # Deal with trimming the data
   # by removing the specific number of observations
   # in both technical variation 'tv' groups
@@ -48,17 +48,17 @@ run.gamlss <- function(d = d,
     d <- d %>%
       dplyr::mutate(TPM = log(TPM))
   }
-
+  
   # Define the equation
   model.equation.mu <- formula(paste0("TPM ~ ", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                       collapse = " + ")))
   model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                     collapse = " + ")))
-
+  
   m <- invisible(try(gamlss::gamlss(model.equation.mu, sigma.formula = model.equation.sigma, 
-                            data = d, family = NO, 
-                            control = gamlss::gamlss.control(trace=FALSE))))
-
+                                    data = d, family = NO, 
+                                    control = gamlss::gamlss.control(trace=FALSE))))
+  
   if(return == "simple") {
     if(inherits(m, "try-error")){
       return(message("ERROR"))
@@ -105,26 +105,7 @@ run.gamlss <- function(d = d,
       sigma.part <- sigma.vector[1] + (as.matrix(d[,-c(1,2,3)]) %*% sigma.vector[-1])
       correction <- exp(((d$TPM - mu.part) / exp(sigma.part)))[,1]
       return(list(coefficients = out, TPMs = tibble::tibble(`Non-corrected` = d$TPM[d$tv == 1],
-                                                    Corrected = correction[d$tv == 1])))
+                                                            Corrected = correction[d$tv == 1])))
     }
   }
 }
-
-
-#' Extract Sidak Corrected p-values as a simple vector
-#'
-#' @param x a collection of p-values to be corrected using the Sidak correction
-#' @return A vector of Sidak-corrected p-values.
-extract.sidak <- function(x){
-  return(mutoss::sidak(x)$adjPValues)
-}
-
-
-#' Extract Bonferroni Corrected p-values as a simple vector
-#'
-#' @param x a collection of p-values to be corrected using the Bonferroni correction
-#' @return A vector of Bonferroni-corrected p-values.
-extract.bonferroni <- function(x){
-  return(mutoss::bonferroni(x)$adjPValues)
-}
-

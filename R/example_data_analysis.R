@@ -1,4 +1,11 @@
-source("R/globals.R")
+# make all required functions known
+
+source("R/run.gamlss.R")
+source("R/extract.sidak.R")
+source("R/extract.bonferroni.R")
+source("R/pipeline_global.R")
+
+# load breast cancer data and apply pipeline
 
 load("data/breast-cancer-data-ready-to-pipeline.RData")
 View(breast.cancer)
@@ -20,7 +27,8 @@ pipeline_global(d = breast.cancer,
                 re.placement = "both")
 
 
-
+# load glioma data and apply pipeline
+# 
 load("data/glioma-data-ready-to-pipeline.RData")
 View(glioma)
 
