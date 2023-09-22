@@ -42,8 +42,15 @@ pipeline_global <- function(d = NULL,
                             add1.1st = FALSE, add1.2nd = TRUE,
                             trim.1st = 3, trim.2nd = NA,
                             zeros.1st = TRUE, zeros.2nd = FALSE,
-                            zero.value.1st = NA, zero.value.2nd = 0) {
+                            zero.value.1st = NA, zero.value.2nd = 0,
+                    # the following functionality was discussed but is not yet properly implemented, not tested and not explained!
+                    # the step "inferring" is missing completely
+                            screening=T,testing=T,correcting=T,inferring=T) {
 
+  #############################################################
+  ## Rearranging input matrix and checking of correct format ##
+  #############################################################
+  
   # Keep an internal id record '.id'
   d <- dplyr::mutate(d, id = 1:dplyr::n())
 
@@ -66,7 +73,7 @@ pipeline_global <- function(d = NULL,
   }
   if (length(levels(d$tv)) != 2) {
     stop("The technical variation must be a factor with strictly 2 levels, 
-         the first one refering to the pool-and-split controls, 
+         the first one referring to the pool-and-split controls, 
          and the second one to the 10-cell samples.")
   }
 
@@ -91,7 +98,25 @@ pipeline_global <- function(d = NULL,
     dplyr::left_join(dplyr::mutate(d.mm, id = 1:dplyr::n()))
   # 
   N.total.genes <- length(unique(D$gene))
-                               
+    
+  ###########################################       
+  ## Run the chosen steps of the pipeline: 
+  ##   i) screening
+  ##  ii) testing
+  ## iii) correcting
+  ##  iv) inferring
+  ###########################################       
+  
+  ###########################################       
+  ## Step i: screening
+  ## 
+  ## Estimate a GAMLSS;
+  ## keep only those genes where samples have larger technical variation than controls;
+  ## and where the p-value (which p-value?!!) is <= 0.05 after Sidak correction
+  ## 
+  ###########################################
+      
+if (screening) {                  
   #-----------------------------------------------------
   # First call to 'run.gamlss()'
   # do it gene by gene in a loop, and put it all back together into
@@ -126,8 +151,9 @@ pipeline_global <- function(d = NULL,
   #sidak(out.gamlss1$Pval)
   #extract.sidak(out.gamlss1$Pval)
   
+print("Is Pval known at this point?")  
   out.sidak <- out.gamlss1 %>%
-    dplyr::mutate(Pval.sidak = extract.sidak(Pval)) 
+    dplyr::mutate(Pval.sidak = extract.sidak(Pval))
   
   out.screening1 <- out.gamlss1 %>%
     dplyr::mutate(Pval.sidak = extract.sidak(Pval)) %>%
@@ -136,7 +162,18 @@ pipeline_global <- function(d = NULL,
   
   # Proportion of genes kept after sidak correction and removing negative sigma estimates
   message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
+}
 
+  
+  ###########################################       
+  ## Step ii: testing
+  ## 
+  ## Estimate a GAMLSS to identify possible batch effects
+  ## 
+  ###########################################
+
+if (testing) {
+  
   #-----------------------------------------------------
   # Third part: Run a GAMLSS with log of TPM+1.
   # Return a single row for each gene with the Sigma coefficient and sigma p-value
@@ -168,7 +205,6 @@ pipeline_global <- function(d = NULL,
                        return = "simple")))
   }
   
-  
   #-----------------------------------------------------
   # Fourth part: Run a FDR Correction of sigma-type p-values and keep only
   # sigma.type > 0 & Pval.fdr <= 0.05
@@ -186,6 +222,20 @@ pipeline_global <- function(d = NULL,
   
   # Proportion of genes kept after FDR correction and removing negative sigma estimates
   message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
+  
+}
+
+###########################################       
+## Step iii: correcting
+## 
+## Use the estimated GAMLSS coefficients from the previous testing step
+## for batch correction
+## (this only makes sense if testing was done)
+## 
+###########################################
+
+if (correcting) {
+  
   
   #----------------------------------------------------
   # Fifth part: Run again the GAMLSS with log of TPM+1 only for selected genes.
@@ -227,5 +277,6 @@ pipeline_global <- function(d = NULL,
   return(list(Coefficients = out.coefficients,
               `Corrected output` = out.corrected))
 
+}
 }
 
