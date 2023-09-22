@@ -49,9 +49,18 @@ run.gamlss <- function(d = d,
       dplyr::mutate(TPM = log(TPM))
   }
   
-  # Define the equation
+  # Build the model equations for the GAMLSS
+  
+  # Equation for the location parameter:
+  # on the left TPM,
+  # on the right all column names except TPM, id and gene (each as a linear term)
+  
   model.equation.mu <- formula(paste0("TPM ~ ", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                       collapse = " + ")))
+  
+  # Equation for the scale parameter:
+  # WHY NOT TPM ON THE LEFT?
+  # on the right all column names except TPM, id and gene (each as a linear term)
   model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                     collapse = " + ")))
   
