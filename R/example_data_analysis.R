@@ -3,7 +3,7 @@
 source("R/stochprofIC.gamlss.R")
 source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
-source("R/pipeline_global.R")
+source("R/stochprofIC.pipeline.R")
 
 require("gamlss")
 
@@ -12,7 +12,7 @@ require("gamlss")
 load("data/breast-cancer-data-ready-to-pipeline.RData")
 View(breast.cancer)
 
-pipeline_global(d = breast.cancer,
+stochprofIC.pipeline(d = breast.cancer,
                 TPM = "TPM",
                 technical.variation = "type",
                 covariates = "biopsy",
@@ -34,7 +34,7 @@ pipeline_global(d = breast.cancer,
 load("data/glioma-data-ready-to-pipeline.RData")
 View(glioma)
 
-pipeline_global(d = glioma,
+stochprofIC.pipeline(d = glioma,
                TPM = "TPM",
                technical.variation = "type",
                covariates = "sex",

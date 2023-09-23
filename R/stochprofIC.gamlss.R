@@ -1,17 +1,17 @@
-#' Run a gamlss() call in a specific way suitable for pipeline()
+#' Run a gamlss() call in a specific way suitable for stochprofIC.pipeline
 #'
 #' Internal function to facilitate the call to gamlss() using the necessary
-#' parts for pipeline()
+#' parts for stochprofIC.pipeline
 #'
-#' @param d Tidy data frame that has already been processed by pipeline() and contains a single gene.
+#' @param d Tidy data frame that has already been processed by stochprofIC.pipeline and contains a single gene.
 #' @param return Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values
-#' @param log See \code{\link{pipeline}}
-#' @param trim See \code{\link{pipeline}}
-#' @param zeros See \code{\link{pipeline}}
-#' @param zero.value See \code{\link{pipeline}}
-#' @param add.1 See \code{\link{pipeline}}
-#' @param re See \code{\link{pipeline}}. Not yet implemented.
-#' @param re.placement See \code{\link{pipeline}}. Not yet implemented.
+#' @param log See \code{\link{stochprofIC.pipeline}}
+#' @param trim See \code{\link{stochprofIC.pipeline}}
+#' @param zeros See \code{\link{stochprofIC.pipeline}}
+#' @param zero.value See \code{\link{stochprofIC.pipeline}}
+#' @param add.1 See \code{\link{stochprofIC.pipeline}}
+#' @param re See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
+#' @param re.placement See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @return Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
 stochprofIC.gamlss <- function(d,
                        return = "simple",

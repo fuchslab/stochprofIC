@@ -29,10 +29,10 @@
 #' @return A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
 #' @examples
 #'\dontrun{
-#'pipeline_global()
+#'stochprofIC.pipeline()
 #' XXXX we need to think a way to pass some example data
 #'}
-pipeline_global <- function(d = NULL,
+stochprofIC.pipeline <- function(d = NULL,
                             TPM = NULL,
                             technical.variation = NULL,
                             covariates = NULL,
