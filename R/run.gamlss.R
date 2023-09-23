@@ -65,7 +65,7 @@ run.gamlss <- function(d = d,
                                                     collapse = " + ")))
   
   m <- invisible(try(gamlss::gamlss(model.equation.mu, sigma.formula = model.equation.sigma, 
-                                    data = d, family = NO, 
+                                    data = d, family = gamlss.dist::NO, 
                                     control = gamlss::gamlss.control(trace=FALSE))))
   
   if(return == "simple") {
