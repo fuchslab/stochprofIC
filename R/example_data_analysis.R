@@ -5,6 +5,8 @@ source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
 source("R/pipeline_global.R")
 
+require("gamlss")
+
 # load breast cancer data and apply pipeline
 
 load("data/breast-cancer-data-ready-to-pipeline.RData")

@@ -13,7 +13,7 @@
 #' @param re See \code{\link{pipeline}}. Not yet implemented.
 #' @param re.placement See \code{\link{pipeline}}. Not yet implemented.
 #' @return Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
-run.gamlss <- function(d = d,
+run.gamlss <- function(d,
                        return = "simple",
                        log = NULL, trim = NULL, 
                        zeros = NULL, zero.value = NULL, add.1 = NULL,
@@ -59,14 +59,17 @@ run.gamlss <- function(d = d,
                                                       collapse = " + ")))
   
   # Equation for the scale parameter:
-  # WHY NOT TPM ON THE LEFT?
   # on the right all column names except TPM, id and gene (each as a linear term)
   model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                     collapse = " + ")))
   
-  m <- invisible(try(gamlss::gamlss(model.equation.mu, sigma.formula = model.equation.sigma, 
+  # Estimation of the GAMLSS
+  m <- invisible(try(gamlss::gamlss(formula = model.equation.mu, 
+                                    sigma.formula = model.equation.sigma, 
                                     data = d, family = NO, 
                                     control = gamlss::gamlss.control(trace=FALSE))))
+  
+## Why try and error here?  
   
   if(return == "simple") {
     if(inherits(m, "try-error")){
@@ -108,6 +111,10 @@ run.gamlss <- function(d = d,
         dplyr::mutate(Estimate = ifelse(Variable == "tv", 0, Estimate)) %>%
         tibble::column_to_rownames("Variable") %>%
         as.matrix()
+  
+# The following refers to fixed column numbers 1,2,3. This is too error-probe because the (ir)relevant columns might be anywhere. --> Change
+          
+      
       # d contains id, gene, TPM, and then the tv and the remaining covariates
       # Therefore the matrix multiplication must reflect that
       mu.part <- mu.vector[1] + (as.matrix(d[,-c(1,2,3)])%*% mu.vector[-1])
