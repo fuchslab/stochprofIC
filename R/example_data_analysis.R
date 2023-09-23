@@ -5,7 +5,8 @@ source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
 source("R/stochprofIC.pipeline.R")
 
-require("gamlss")
+require(gamlss)
+require(dplyr)
 
 # load breast cancer data and apply pipeline
 

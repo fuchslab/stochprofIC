@@ -69,6 +69,9 @@ stochprofIC.gamlss <- function(d,
                                     data = d, family = gamlss.dist::NO, 
                                     control = gamlss::gamlss.control(trace=FALSE))))
   
+  
+## I (CF) don't know what the folloing lines are doing
+  
 ## Why try and error here?  
   
   if(return == "simple") {
@@ -112,14 +115,17 @@ stochprofIC.gamlss <- function(d,
         tibble::column_to_rownames("Variable") %>%
         as.matrix()
   
-# The following refers to fixed column numbers 1,2,3. This is too error-probe because the (ir)relevant columns might be anywhere. --> Change
+# The following refers to fixed column numbers 1,2,3. This is too error-prone because the (ir)relevant columns might be anywhere. --> Change
           
+# Correction is already part of this function (--> function should have a different name and description).
+# If correction happens here -- what happens to those values that were trimmed?
       
       # d contains id, gene, TPM, and then the tv and the remaining covariates
       # Therefore the matrix multiplication must reflect that
       mu.part <- mu.vector[1] + (as.matrix(d[,-c(1,2,3)])%*% mu.vector[-1])
       sigma.part <- sigma.vector[1] + (as.matrix(d[,-c(1,2,3)]) %*% sigma.vector[-1])
       correction <- exp(((d$TPM - mu.part) / exp(sigma.part)))[,1]
+      
       return(list(coefficients = out, TPMs = tibble::tibble(`Non-corrected` = d$TPM[d$tv == 1],
                                                             Corrected = correction[d$tv == 1])))
     }
