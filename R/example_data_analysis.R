@@ -1,6 +1,6 @@
 # make all required functions known
 
-source("R/run.gamlss.R")
+source("R/stochprofIC.gamlss.R")
 source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
 source("R/pipeline_global.R")

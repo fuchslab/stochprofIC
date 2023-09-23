@@ -118,7 +118,7 @@ pipeline_global <- function(d = NULL,
       
 if (screening) {                  
   #-----------------------------------------------------
-  # First call to 'run.gamlss()'
+  # First call to 'stochprofIC.gamlss()'
   # do it gene by gene in a loop, and put it all back together into
   # the object called 'out.gamlss1',
   # that will contain a structured dataframe with the minimal required results
@@ -132,7 +132,7 @@ if (screening) {
       filter(gene == gene.now)
     out.gamlss1 <- bind_rows(out.gamlss1, 
                    bind_cols(gene = gene.now,
-                    run.gamlss(d.gene,
+                   stochprofIC.gamlss(d.gene,
                                re = re, re.placement = re.placement,
                                log = log.1st,
                                add.1 = add1.1st,
@@ -182,7 +182,7 @@ if (testing) {
   # It requires 
   
   # Manual test for a single gene
-  #run.gamlss(filter(d, gene == levels(d$gene)[1]))
+  #stochprofIC.gamlss(filter(d, gene == levels(d$gene)[1]))
   
   # Run several genes
   d.post.sidak <- D %>%
@@ -194,7 +194,7 @@ if (testing) {
     gene.now <- levels(d.post.sidak$gene)[g]
     out.gamlss2 <- dplyr::bind_rows(out.gamlss2, 
           dplyr::bind_cols(gene = levels(d.post.sidak$gene)[g],
-            run.gamlss(dplyr::filter(d.post.sidak, 
+            stochprofIC.gamlss(dplyr::filter(d.post.sidak, 
                        gene == levels(d.post.sidak$gene)[g]),
                        re = re, re.placement = re.placement,
                        log = log.2nd,
@@ -251,7 +251,7 @@ if (correcting) {
   for(g in 1:length(levels(d.post.fdr$gene))){
     d.now <- d.post.fdr %>%
       dplyr::filter(gene == levels(d.post.fdr$gene)[g])
-    out.full <- run.gamlss(d.now,
+    out.full <- stochprofIC.gamlss(d.now,
                            return = "full", 
                            re = re, re.placement = re.placement,
                            log = log.2nd,

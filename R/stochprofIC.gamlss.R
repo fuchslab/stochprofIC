@@ -13,7 +13,7 @@
 #' @param re See \code{\link{pipeline}}. Not yet implemented.
 #' @param re.placement See \code{\link{pipeline}}. Not yet implemented.
 #' @return Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
-run.gamlss <- function(d,
+stochprofIC.gamlss <- function(d,
                        return = "simple",
                        log = NULL, trim = NULL, 
                        zeros = NULL, zero.value = NULL, add.1 = NULL,
