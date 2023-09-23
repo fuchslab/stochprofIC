@@ -10,6 +10,7 @@ Depends:
   tibble,
   tidyselect,
   gamlss,
+  gamlss.dist,
   mutoss,
   tidyr,
   stringr
