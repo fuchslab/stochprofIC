@@ -63,10 +63,15 @@ stochprofIC.gamlss <- function(d,
   model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
                                                     collapse = " + ")))
   
+<<<<<<< HEAD:R/stochprofIC.gamlss.R
   # Estimation of the GAMLSS
   m <- invisible(try(gamlss::gamlss(formula = model.equation.mu, 
                                     sigma.formula = model.equation.sigma, 
                                     data = d, family = NO, 
+=======
+  m <- invisible(try(gamlss::gamlss(model.equation.mu, sigma.formula = model.equation.sigma, 
+                                    data = d, family = gamlss.dist::NO, 
+>>>>>>> e03481b5e6a31ce58af00f81a6f7ecba2171cea1:R/run.gamlss.R
                                     control = gamlss::gamlss.control(trace=FALSE))))
   
 ## Why try and error here?  
