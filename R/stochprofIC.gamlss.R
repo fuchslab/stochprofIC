@@ -73,6 +73,8 @@ stochprofIC.gamlss <- function(d,
 ## I (CF) don't know what the folloing lines are doing
   
 ## Why try and error here?  
+  ## Try and error allows us to continue with the function when gamlss has failed
+  ## or not converged or not produced all the necessary estimates.
   
   if(return == "simple") {
     if(inherits(m, "try-error")){
@@ -83,10 +85,10 @@ stochprofIC.gamlss <- function(d,
         return(message("ERROR"))
       } else {
         out <- sm %>%
-          tibble::tibble(rownames = "Variable") %>%
-          dplyr::slice(((dplyr::n()/2)+1):dplyr::n()) %>%
+          as.data.frame() %>% 
+          tibble::rownames_to_column("Variable") %>%
           dplyr::select(Variable, Estimate, Pval = 5) %>%
-          dplyr::filter(Variable == "tv")
+          dplyr::filter(Variable == "tv.1")
         if(dim(out)[1] > 0){
           return(out)
         } else{
@@ -100,7 +102,8 @@ stochprofIC.gamlss <- function(d,
       return(message("ERROR"))
     } else {
       out <- sm %>%
-        tibble::tibble(rownames = "Variable") %>%
+        as.data.frame() %>% 
+        tibble::rownames_to_column("Variable") %>%
         dplyr::mutate(Part = gl(2,(dplyr::n()/2), labels = c("Mu", "Sigma"))) %>%
         dplyr::select(Variable, Part, Estimate)
       mu.vector <- out %>%
