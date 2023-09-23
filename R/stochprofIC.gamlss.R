@@ -119,6 +119,7 @@ stochprofIC.gamlss <- function(d,
           
 # Correction is already part of this function (--> function should have a different name and description).
 # If correction happens here -- what happens to those values that were trimmed?
+# Is log-transformation taken into account?
       
       # d contains id, gene, TPM, and then the tv and the remaining covariates
       # Therefore the matrix multiplication must reflect that
