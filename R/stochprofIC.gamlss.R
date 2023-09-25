@@ -20,8 +20,13 @@ stochprofIC.gamlss <- function(d,
                        re = NA, re.placement = "both") {
   
 # The following lines assume that the column names are exactly as defined in stochprofIC.pipeline. We should not do that.
+  ## I don't understand why not... I guess there are 2 issues to discuss here:
+  ## First, do we really want this function to work independently of the stochprofIC.pipeline? If not, the rest of the discussion is over.
+  ## I personally think that there is no need to have this function exported as a general function in the package. 
+  ## However (and second), if we want to have this stochprofIC.gamlss as a general function in the package, then certainly
+  ## we need to ensure that the input object contains the names that we want. I can improve the documentation (line 6).
   
-    # Deal with trimming the data
+  # Deal with trimming the data
   # by removing the specific number of observations
   # in both technical variation 'type' groups
   if (!is.na(trim)) {
@@ -121,10 +126,21 @@ stochprofIC.gamlss <- function(d,
         as.matrix()
   
 # The following refers to fixed column numbers 1,2,3. This is too error-prone because the (ir)relevant columns might be anywhere. --> Change
-          
+      ## In principle, we ensure the structure of d in the stochprofIC.pipeline.R, line 117.
+      ## Therefore, the order will be always 1=id, 2=gene and 3=expr.
 # Correction is already part of this function (--> function should have a different name and description).
+      ## Again, this depends on what we want about stochprofIC.gamlss, if it is a function itself or not.
+      ## But if it has to be out, this is a big design change, because from gamlss I already 
+      ## have both original data and gamlss estimates, while in the stochprofIC.pipeline, I don't 
+      ## have both in the same way. I could try...
 # If correction happens here -- what happens to those values that were trimmed?
+      ## In the stochprofIC.pipeline function we already define the trimming 
+      ## for the 1st gamlss and for the 2nd gamlss: trim.1st = 3, trim.2nd = NA. 
+      ## Therefore, in the 2nd gamlss, in which we should not have trimmed,
+      ## we obtain the corrected values for all the input data.
 # Is log-transformation taken into account?
+      ## The log-transformation is only taken into account in the 2nd gamlss.
+      ## By default, the stchorpfoIC.pipeline has: log.1st = FALSE, log.2nd = TRUE
       
       # d contains id, gene, expr, and then the type and the remaining covariates
       # Therefore the matrix multiplication must reflect that
