@@ -4,17 +4,17 @@
 #' for location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity 
 #' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
 #' in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
-#' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, and the second based on 
-#' log expr+1 without trimming.
+#' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, 
+#' # and the second based on log expr+1 without trimming.
 #'
 #' ### Merce, please check the description of the next lines for correctness.
 #'
 #' @encoding UTF-8
 #' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
-#' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million. This column is expected to contain double values.
+#' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
-#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels.
-#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values.
+#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the controls and the small-pool samples.
+#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
 #' 
 #' Needed: description of these two levels
 #' 
@@ -39,7 +39,6 @@
 #' @examples
 #'\dontrun{
 #'stochprofIC.pipeline()
-#' XXXX we need to think a way to pass some example data
 #'}
 stochprofIC.pipeline <- function(d,
                             expr,
@@ -57,7 +56,7 @@ stochprofIC.pipeline <- function(d,
                             # screening=T,testing=T,correcting=T,inferring=T
                     # I suggest to have a single argument with 3 possibilities
                     # It would be return = "screening", "testing" or "correcting&inferring",
-                    # with the default as "Correcting&Inferring"
+                    # with the default as "correcting&inferring"
                             return = "correcting&inferring") {
 
   #############################################################
@@ -81,7 +80,6 @@ stochprofIC.pipeline <- function(d,
   # Ensure the column containing the measurement type is called "type"
   d <- dplyr::rename(d, type = !!type)
   
-  
 
 # Christiane: Code checking to be continues from here
 
@@ -94,7 +92,7 @@ stochprofIC.pipeline <- function(d,
   if (length(levels(d$type)) != 2) {
     stop("The technical variation must be a factor with strictly 2 levels, 
          the first one referring to the pool-and-split controls, 
-         and the second one to the 10-cell samples.")
+         and the second one to the small-pool samples.")
   }
 
   # Ensure that for technical variation (type) zero and one are created
@@ -113,7 +111,7 @@ stochprofIC.pipeline <- function(d,
   d.mm <- data.frame(stats::model.matrix(~ ., data = dplyr::select(d.cv, -id))[,-1])
   # Keep only the relevant variables in a tidy format
   # From now on, 'D' is the result of arranging and checking the input
-  # provided by the user
+  # provided by the user. It contains the variables in an specific order: id, gene, expr, type, covariates.
   D <- dplyr::select(d, id, gene, expr, type) %>%
     dplyr::left_join(dplyr::mutate(d.mm, id = 1:dplyr::n()))
   # 
@@ -133,16 +131,16 @@ stochprofIC.pipeline <- function(d,
   ## 
   ## Estimate a GAMLSS;
   ## keep only those genes where samples have larger technical variation than controls;
-  ## and where the p-value (which p-value?!!) is <= 0.05 after Sidak correction
+  ## and where the p-value of the sigma coefficient for the technical variation (sigma.type) 
+  ## is <= 0.05 after Sidak correction
   ## 
   ###########################################
       
 #if (screening) {                  
   #-----------------------------------------------------
   # First call to 'stochprofIC.gamlss()'
-  # do it gene by gene in a loop, and put it all back together into
-  # the object called 'out.gamlss1',
-  # that will contain a structured dataframe with the minimal required results
+  # do it gene by gene in a loop, and put it all back together into the object called 'out.gamlss1', 
+  # that will contain a structured dataframe with the minimal required results 
   # (gene, sigma coefficient for technical variation, p-value for technical variation)
   #
   out.gamlss1 <- NULL
@@ -168,11 +166,7 @@ stochprofIC.pipeline <- function(d,
   # Second part: Run a Sidak Correction of sigma-type p-values and keep only
   # sigma.type > 0 & Pval.sidak <= 0.05
   
-  # Manual test for extracting sidak p-values
-  #sidak(out.gamlss1$Pval)
-  #extract.sidak(out.gamlss1$Pval)
-  
-print("Is Pval known at this point?")  
+#print("Is Pval known at this point?")  
   out.sidak <- out.gamlss1 %>%
     dplyr::mutate(Pval.sidak = extract.sidak(Pval))
   
@@ -181,10 +175,9 @@ print("Is Pval known at this point?")
     dplyr::filter(Estimate >= 0) %>%
     dplyr::filter(Pval.sidak <= 0.05)
   
-  # Proportion of genes kept after sidak correction and removing negative sigma estimates
-  message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
-
   if(return == "screening"){
+    # Proportion of genes kept after sidak correction and removing negative sigma estimates
+    message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
     return(out.screening1)
   }
 
@@ -203,9 +196,6 @@ print("Is Pval known at this point?")
   # for the variable that captures the technical/biological variation (type) as well as
   # the rest of mu and sigma coefficients to correct for technical variation
   # It requires 
-  
-  # Manual test for a single gene
-  #stochprofIC.gamlss(filter(d, gene == levels(d$gene)[1]))
   
   # Run several genes
   d.post.sidak <- D %>%
@@ -235,19 +225,18 @@ print("Is Pval known at this point?")
   # Manual test for extracting bonferroni p-values (FDR)
   out.fdr <- out.gamlss2 %>%
     dplyr::mutate(Pval.dfr = stats::p.adjust(Pval, method="fdr")) 
-  out.fdr
   
   out.screening2 <- out.gamlss2 %>%
     dplyr::mutate(Pval.fdr = stats::p.adjust(Pval, method="fdr")) %>%
     dplyr::filter(Estimate >= 0) %>%
     dplyr::filter(Pval.fdr <= 0.05)
-  out.screening2
   
-  # Proportion of genes kept after FDR correction and removing negative sigma estimates
-  message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
+  
   
 #}
   if(return == "testing"){
+    # Proportion of genes kept after FDR correction and removing negative sigma estimates
+    message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
     return(out.screening2)
   }
   
@@ -272,8 +261,6 @@ print("Is Pval known at this point?")
     dplyr::filter(gene %in% out.screening2$gene) %>%
     droplevels()
   
-  
-   
   out.corrected <- out.coefficients <- NULL
   for(g in 1:length(levels(d.post.fdr$gene))){
     d.now <- d.post.fdr %>%
@@ -302,6 +289,13 @@ print("Is Pval known at this point?")
            Variable = factor(Variable))
   
 # Columns have to be renamed again!  
+  
+  # Screening information: 
+  # Proportion of genes kept after sidak correction and removing negative sigma estimates
+  message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
+  # Testing information: 
+  # Proportion of genes kept after FDR correction and removing negative sigma estimates
+  message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
   
   return(list(Coefficients = out.coefficients,
               `Corrected output` = out.corrected))
