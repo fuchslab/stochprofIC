@@ -74,14 +74,9 @@ stochprofIC.pipeline <- function(d,
   
   # Parser for expr: ensure that it is a numerical value
   # and that the name of the variable is indeed 'expr'
-  print(head(d))
-  
-  
-  if (!is.double(d$expr)) {
+    if (!is.double(d$expr)) {
     stop("'expr' must be the name of an existing numerical value.")
   }
-  print(head(d))
-  #stop()
   
 
   # Parser technical variation, ensure that it is a factor with only 2 levels
