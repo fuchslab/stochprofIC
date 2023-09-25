@@ -5,8 +5,8 @@ source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
 source("R/stochprofIC.pipeline.R")
 
-install.packages("BiocManager")
-BiocManager::install("multtest")
+#install.packages("BiocManager")
+#BiocManager::install("multtest")
 
 require(gamlss)
 require(dplyr)
@@ -36,7 +36,21 @@ stochprofIC.pipeline(d = breast.cancer,
                 trim.2nd = NA,
                 zeros.1st = TRUE, zeros.2nd = FALSE,
                 zero.value.1st = NA, zero.value.2nd = 0,
-                re.placement = "both")
+                re.placement = "both",
+                screening=T,testing=T,correcting=T,inferring=T)
+
+### If we want to save the full output of the stochprofIC.pipeline
+full.output <- stochprofIC.pipeline(d = breast.cancer,
+                                    TPM = "TPM",
+                                    technical.variation = "type",
+                                    covariates = "biopsy",
+                                    gene = "gene")
+
+full.output$Coefficients
+full.output$Corrected
+
+
+
 
 
 # load glioma data and apply pipeline
@@ -67,13 +81,4 @@ stochprofIC.pipeline(d = glioma,
                re.placement = "both")
 
 
-### If we want to save the full output of the stochprofIC.pipeline
-full.output <- stochprofIC.pipeline(d = breast.cancer,
-                                    TPM = "TPM",
-                                    technical.variation = "type",
-                                    covariates = "biopsy",
-                                    gene = "gene")
-
-full.output$Coefficients
-full.output$Corrected
   
