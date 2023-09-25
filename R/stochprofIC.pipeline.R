@@ -11,10 +11,10 @@
 #'
 #' @encoding UTF-8
 #' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
-#' @param expr Name (string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million. This column is expected to contain double values.
-#' @param gene Name (string) of the column in \code{d} that contains the names of the genes. This column is expected to contain string values.
-#' @param type Name (string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels.
-#' @param covariates Names (vector of strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor variables.
+#' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million. This column is expected to contain double values.
+#' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
+#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels.
+#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values.
 #' 
 #' Needed: description of these two levels
 #' 
@@ -62,22 +62,23 @@ stochprofIC.pipeline <- function(d,
   # Add an additional column "id", assigning an internal ID to each row
   d <- dplyr::mutate(d, id = 1:dplyr::n())
   
-  # Make sure the column containing the gene expression values is called "expr"
+  # Ensure the column containing the gene expression values is called "expr"
   d <- dplyr::rename(d, expr = !!expr)
   
-    # Make sure the column containing the gene names is called "gene"
+  # Ensure that "expr" contains numerical value
+  if (!is.double(d$expr)) {
+    stop("'expr' must contain values of type double.")
+  }
+  
+  # Ensure the column containing the gene names is called "gene"
   d <- dplyr::rename(d, gene = !!gene)
   
-  # Make sure the column containing the measurement type is called "type"
+  # Ensure the column containing the measurement type is called "type"
   d <- dplyr::rename(d, type = !!type)
   
   
-  # Parser for expr: ensure that it is a numerical value
-  # and that the name of the variable is indeed 'expr'
-    if (!is.double(d$expr)) {
-    stop("'expr' must be the name of an existing numerical value.")
-  }
-  
+
+# Christiane: Code checking to be continues from here
 
   # Parser technical variation, ensure that it is a factor with only 2 levels
   # and that its name is 'type'
