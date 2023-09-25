@@ -19,48 +19,50 @@ stochprofIC.gamlss <- function(d,
                        zeros = NULL, zero.value = NULL, add.1 = NULL,
                        re = NA, re.placement = "both") {
   
-  # Deal with trimming the data
+# The following lines assume that the column names are exactly as defined in stochprofIC.pipeline. We should not do that.
+  
+    # Deal with trimming the data
   # by removing the specific number of observations
-  # in both technical variation 'tv' groups
+  # in both technical variation 'type' groups
   if (!is.na(trim)) {
     d <- d %>%
-      dplyr::group_by(dplyr::across(-c(id, gene, TPM))) %>% 
-      dplyr::arrange(TPM) %>%
+      dplyr::group_by(dplyr::across(-c(id, gene, expr))) %>% 
+      dplyr::arrange(expr) %>%
       dplyr::slice(-c(1:trim)) %>%
-      dplyr::arrange(dplyr::desc(TPM)) %>% 
+      dplyr::arrange(dplyr::desc(expr)) %>% 
       dplyr::slice(-c(1:trim)) %>%
       dplyr::ungroup()
   }
   # Deal with zeros
   if (zeros == TRUE) {
     d <- d %>%
-      dplyr::mutate(TPM = ifelse(TPM == 0, zero.value, TPM))
+      dplyr::mutate(expr = ifelse(expr == 0, zero.value, expr))
   }
   # In any case, keep missing values out
-  d <- dplyr::filter(d, !is.na(TPM))
-  # Add 1 to TPM (tpm+1)
+  d <- dplyr::filter(d, !is.na(expr))
+  # Add 1 to expr (expr+1)
   if (add.1 == TRUE) {
     d <- d %>%
-      dplyr::mutate(TPM = TPM + 1)
+      dplyr::mutate(expr = expr + 1)
   }
   # Log or not the gene expression
   if (log == TRUE) {
     d <- d %>%
-      dplyr::mutate(TPM = log(TPM))
+      dplyr::mutate(expr = log(expr))
   }
   
   # Build the model equations for the GAMLSS
   
   # Equation for the location parameter:
-  # on the left TPM,
-  # on the right all column names except TPM, id and gene (each as a linear term)
+  # on the left expr,
+  # on the right all column names except expr, id and gene (each as a linear term)
   
-  model.equation.mu <- formula(paste0("TPM ~ ", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
+  model.equation.mu <- formula(paste0("expr ~ ", paste(names(d)[!(names(d) %in% c("expr", "id", "gene"))], 
                                                       collapse = " + ")))
   
   # Equation for the scale parameter:
-  # on the right all column names except TPM, id and gene (each as a linear term)
-  model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("TPM", "id", "gene"))], 
+  # on the right all column names except expr, id and gene (each as a linear term)
+  model.equation.sigma <- formula(paste0("~", paste(names(d)[!(names(d) %in% c("expr", "id", "gene"))], 
                                                     collapse = " + ")))
   
   # Estimation of the GAMLSS
@@ -88,11 +90,11 @@ stochprofIC.gamlss <- function(d,
           as.data.frame() %>% 
           tibble::rownames_to_column("Variable") %>%
           dplyr::select(Variable, Estimate, Pval = 5) %>%
-          dplyr::filter(Variable == "tv.1")
+          dplyr::filter(Variable == "type.1")
         if(dim(out)[1] > 0){
           return(out)
         } else{
-          return(tibble::tibble(Variable = "tv", Estimate = NA, Pval = NA))
+          return(tibble::tibble(Variable = "type", Estimate = NA, Pval = NA))
         }
       }
     }
@@ -114,7 +116,7 @@ stochprofIC.gamlss <- function(d,
       sigma.vector <- out %>%
         dplyr::filter(Part == "Sigma") %>%
         dplyr::select(Variable, Estimate) %>%
-        dplyr::mutate(Estimate = ifelse(Variable == "tv", 0, Estimate)) %>%
+        dplyr::mutate(Estimate = ifelse(Variable == "type", 0, Estimate)) %>%
         tibble::column_to_rownames("Variable") %>%
         as.matrix()
   
@@ -124,14 +126,14 @@ stochprofIC.gamlss <- function(d,
 # If correction happens here -- what happens to those values that were trimmed?
 # Is log-transformation taken into account?
       
-      # d contains id, gene, TPM, and then the tv and the remaining covariates
+      # d contains id, gene, expr, and then the type and the remaining covariates
       # Therefore the matrix multiplication must reflect that
       mu.part <- mu.vector[1] + (as.matrix(d[,-c(1,2,3)])%*% mu.vector[-1])
       sigma.part <- sigma.vector[1] + (as.matrix(d[,-c(1,2,3)]) %*% sigma.vector[-1])
-      correction <- exp(((d$TPM - mu.part) / exp(sigma.part)))[,1]
+      correction <- exp(((d$expr - mu.part) / exp(sigma.part)))[,1]
       
-      return(list(coefficients = out, TPMs = tibble::tibble(`Non-corrected` = d$TPM[d$tv == 1],
-                                                            Corrected = correction[d$tv == 1])))
+      return(list(coefficients = out, exprs = tibble::tibble(`Non-corrected` = d$expr[d$type == 1],
+                                                            Corrected = correction[d$type == 1])))
     }
   }
 }

@@ -4,25 +4,33 @@
 #' for location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity 
 #' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
 #' in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
-#' the first based on non-log, trimmed and zeroes converted to NAs TPMs, and the second based on 
-#' log TPM+1 without trimming.
+#' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, and the second based on 
+#' log expr+1 without trimming.
+#'
+#' ### Merce, please check the description of the next lines for correctness.
 #'
 #' @encoding UTF-8
-#' @param d Tidy data frame containing observations of 10-cell samples. The columns should contain genes, TPM, technical variation and the covariates to be adjusted for.
-#' @param TPM Character string with the name of the column in \code{d} that contains the transcripts per million.
-#' @param technical.variation Character string with the name of the column in \code{d} that contains the information whether the observation is from the 10-cell samples or pool-and-split controls.
-#' @param covariates Character string with the name of the columns in \code{d} that contains the variable or variables to be adjusted for, aside of the technical variation
-#' @param gene Character string with the name of the genes
+#' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
+#' @param expr Name (string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million. This column is expected to contain double values.
+#' @param gene Name (string) of the column in \code{d} that contains the names of the genes. This column is expected to contain string values.
+#' @param type Name (string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels.
+#' @param covariates Names (vector of strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor variables.
+#' 
+#' Needed: description of these two levels
+#' 
+#' ### stop checking here (I have to continue later)
+#' 
+#' 
 #' @param log.1st Logical value indicating whether a log transformation should be performed in the first GAMLSS. Defaults to FALSE.
 #' @param log.2nd Logical value indicating whether a log transformation should be performed in the second GAMLSS. Defaults to TRUE.
-#' @param add1.1st Logical value indicating whether a unit should be added to TPM (TPM+1) in the first GAMLSS. Defaults to FALSE.
-#' @param add1.2nd Logical value indicating whether a unit should be added to TPM (TPM+1) in the second GAMLSS. Defaults to TRUE.
+#' @param add1.1st Logical value indicating whether a unit should be added to expr (expr+1) in the first GAMLSS. Defaults to FALSE.
+#' @param add1.2nd Logical value indicating whether a unit should be added to expr (expr+1) in the second GAMLSS. Defaults to TRUE.
 #' @param trim.1st Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed. Defaults to 3 in the first GAMLSS.
 #' @param trim.2nd Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed. Defaults to NA in the second GAMLSS.
-#' @param zeros.1st Logical value indicating whether to change the value of zero in TPM, in the first GAMLSS.
-#' @param zeros.2nd Logical value indicating whether to change the value of zero in TPM, in the second GAMLSS.
-#' @param zero.value.1st Numerical value with the substitute value for zero in TPM, in the first GAMLSS.
-#' @param zero.value.2nd Numerical value with the substitute value for zero in TPM, in the second GAMLSS.
+#' @param zeros.1st Logical value indicating whether to change the value of zero in expr, in the first GAMLSS.
+#' @param zeros.2nd Logical value indicating whether to change the value of zero in expr, in the second GAMLSS.
+#' @param zero.value.1st Numerical value with the substitute value for zero in expr, in the first GAMLSS.
+#' @param zero.value.2nd Numerical value with the substitute value for zero in expr, in the second GAMLSS.
 #' @param re Character string with the name of the variable that carries random effects. Not yet implemented.
 #' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
 #' @export
@@ -32,11 +40,11 @@
 #'stochprofIC.pipeline()
 #' XXXX we need to think a way to pass some example data
 #'}
-stochprofIC.pipeline <- function(d = NULL,
-                            TPM = NULL,
-                            technical.variation = NULL,
+stochprofIC.pipeline <- function(d,
+                            expr,
+                            gene, 
+                            type,
                             covariates = NULL,
-                            gene = NULL, 
                             re = NA, re.placement = "both",
                             log.1st = FALSE, log.2nd = TRUE,
                             add1.1st = FALSE, add1.2nd = TRUE,
@@ -51,35 +59,46 @@ stochprofIC.pipeline <- function(d = NULL,
   ## Rearranging input matrix and checking of correct format ##
   #############################################################
   
-  # Keep an internal id record '.id'
+  # Add an additional column "id", assigning an internal ID to each row
   d <- dplyr::mutate(d, id = 1:dplyr::n())
-
-  # Rename to 'gene' any name the user inputs as the gene variable
+  
+  # Make sure the column containing the gene expression values is called "expr"
+  d <- dplyr::rename(d, expr = !!expr)
+  
+    # Make sure the column containing the gene names is called "gene"
   d <- dplyr::rename(d, gene = !!gene)
-
-  # Parser for TPM: ensure that it is a numerical value
-  # and that the name of the variable is indeed 'TPM'
-  d <- dplyr::rename(d, TPM = !!TPM)
-  if (!is.double(d$TPM)) {
-    stop("'TPM' must be the name of an existing numerical value.")
+  
+  # Make sure the column containing the measurement type is called "type"
+  d <- dplyr::rename(d, type = !!type)
+  
+  
+  # Parser for expr: ensure that it is a numerical value
+  # and that the name of the variable is indeed 'expr'
+  print(head(d))
+  
+  
+  if (!is.double(d$expr)) {
+    stop("'expr' must be the name of an existing numerical value.")
   }
+  print(head(d))
+  #stop()
+  
 
   # Parser technical variation, ensure that it is a factor with only 2 levels
-  # and that its name is 'tv'
-  d <- dplyr::rename(d, tv = !!technical.variation)
-  if (!is.factor(d$tv)) {
-    stop("'technical.variation' must be the name of an existing factor, 
+  # and that its name is 'type'
+  if (!is.factor(d$type)) {
+    stop("'type' must be the name of an existing factor, 
          whose first level refers to the pool-and-split controls.")
   }
-  if (length(levels(d$tv)) != 2) {
+  if (length(levels(d$type)) != 2) {
     stop("The technical variation must be a factor with strictly 2 levels, 
          the first one referring to the pool-and-split controls, 
          and the second one to the 10-cell samples.")
   }
 
-  # Ensure that for technical variation (tv) zero and one are created
+  # Ensure that for technical variation (type) zero and one are created
   # and that the resulting value is an integer (with 1L)
-  d <- d %>% dplyr::mutate(tv = as.integer(tv) - 1L)
+  d <- d %>% dplyr::mutate(type = as.integer(type) - 1L)
 
   # Parse the covariates by first selecting them 
   # and separating them in a different object named 'd.cv'
@@ -94,7 +113,7 @@ stochprofIC.pipeline <- function(d = NULL,
   # Keep only the relevant variables in a tidy format
   # From now on, 'D' is the result of arranging and checking the input
   # provided by the user
-  D <- dplyr::select(d, id, gene, TPM, tv) %>%
+  D <- dplyr::select(d, id, gene, expr, type) %>%
     dplyr::left_join(dplyr::mutate(d.mm, id = 1:dplyr::n()))
   # 
   N.total.genes <- length(unique(D$gene))
@@ -175,7 +194,7 @@ print("Is Pval known at this point?")
 if (testing) {
   
   #-----------------------------------------------------
-  # Third part: Run a GAMLSS with log of TPM+1.
+  # Third part: Run a GAMLSS with log of expr+1.
   # Return a single row for each gene with the Sigma coefficient and sigma p-value
   # for the variable that captures the technical/biological variation (type) as well as
   # the rest of mu and sigma coefficients to correct for technical variation
@@ -238,7 +257,7 @@ if (correcting) {
   
   
   #----------------------------------------------------
-  # Fifth part: Run again the GAMLSS with log of TPM+1 only for selected genes.
+  # Fifth part: Run again the GAMLSS with log of expr+1 only for selected genes.
   # Return a full corrected values for technical variation only in Samples
   
   d.post.fdr <- D %>%
@@ -262,7 +281,7 @@ if (correcting) {
 
     out.corrected <- dplyr::bind_rows(out.corrected, 
                                tibble::tibble(gene = levels(d.post.fdr$gene)[g],
-                                      out.full$TPMs))
+                                      out.full$exprs))   # Christiane: maybe change the name "exprs" in the gamlss function -- a bit confusing
     out.coefficients <- dplyr::bind_rows(out.coefficients, 
                                   tibble::tibble(gene = levels(d.post.fdr$gene)[g],
                                   out.full$coefficients))
@@ -273,6 +292,9 @@ if (correcting) {
   out.coefficients <- out.coefficients %>%
     dplyr::mutate(gene = factor(gene),
            Variable = factor(Variable))
+  
+# Columns have to be renamed again!  
+  
   
   return(list(Coefficients = out.coefficients,
               `Corrected output` = out.corrected))

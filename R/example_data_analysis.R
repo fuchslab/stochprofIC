@@ -1,9 +1,9 @@
 # make all required functions known
 
+source("R/stochprofIC.pipeline.R")
 source("R/stochprofIC.gamlss.R")
 source("R/extract.sidak.R")
 source("R/extract.bonferroni.R")
-source("R/stochprofIC.pipeline.R")
 
 #install.packages("BiocManager")
 #BiocManager::install("multtest")
@@ -22,11 +22,15 @@ breast.cancer <- breast.cancer %>%
   filter(gene %in% levels(gene)[1:50]) %>%
   droplevels()
 
+## for testing
+#colnames(breast.cancer)[5] <- c("hamster")
+
 stochprofIC.pipeline(d = breast.cancer,
-                TPM = "TPM",
-                technical.variation = "type",
-                covariates = "biopsy",
+                expr = "TPM",
                 gene = "gene", 
+                type = "type",
+                covariates = "biopsy",
+                
                 re = NA,   # not implemented yet
                 log.1st = FALSE, 
                 log.2nd = TRUE,
@@ -40,9 +44,11 @@ stochprofIC.pipeline(d = breast.cancer,
                 screening=T,testing=T,correcting=T,inferring=T)
 
 ### If we want to save the full output of the stochprofIC.pipeline
+### 
+### The following call does not work yet because columns have to be re-renamed again.
 full.output <- stochprofIC.pipeline(d = breast.cancer,
-                                    TPM = "TPM",
-                                    technical.variation = "type",
+                                    expr = "TPM",
+                                    type = "type",
                                     covariates = "biopsy",
                                     gene = "gene")
 
@@ -65,8 +71,8 @@ glioma <- glioma %>%
   droplevels()
 
 stochprofIC.pipeline(d = glioma,
-               TPM = "TPM",
-               technical.variation = "type",
+               expr = "TPM",
+               type = "type",
                covariates = "sex",
                gene = "gene", 
                re = NA,
