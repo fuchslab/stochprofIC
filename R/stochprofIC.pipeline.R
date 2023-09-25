@@ -33,6 +33,7 @@
 #' @param zero.value.2nd Numerical value with the substitute value for zero in expr, in the second GAMLSS.
 #' @param re Character string with the name of the variable that carries random effects. Not yet implemented.
 #' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
+#' @param return Character string with either "screening", "testing" or "correcting&inferring". Defaults to "correcting&inferring".
 #' @export
 #' @return A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
 #' @examples
@@ -53,7 +54,11 @@ stochprofIC.pipeline <- function(d,
                             zero.value.1st = NA, zero.value.2nd = 0,
                     # the following functionality was discussed but is not yet properly implemented, not tested and not explained!
                     # the step "inferring" is missing completely
-                            screening=T,testing=T,correcting=T,inferring=T) {
+                            # screening=T,testing=T,correcting=T,inferring=T
+                    # I suggest to have a single argument with 3 possibilities
+                    # It would be return = "screening", "testing" or "correcting&inferring",
+                    # with the default as "Correcting&Inferring"
+                            return = "correcting&inferring") {
 
   #############################################################
   ## Rearranging input matrix and checking of correct format ##
@@ -120,6 +125,7 @@ stochprofIC.pipeline <- function(d,
   ##  ii) testing
   ## iii) correcting
   ##  iv) inferring
+  # I suggest to combine iii) and iv) into a single "correcting&inferring" output
   ###########################################       
   
   ###########################################       
@@ -131,7 +137,7 @@ stochprofIC.pipeline <- function(d,
   ## 
   ###########################################
       
-if (screening) {                  
+#if (screening) {                  
   #-----------------------------------------------------
   # First call to 'stochprofIC.gamlss()'
   # do it gene by gene in a loop, and put it all back together into
@@ -177,9 +183,11 @@ print("Is Pval known at this point?")
   
   # Proportion of genes kept after sidak correction and removing negative sigma estimates
   message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
-}
 
-  
+  if(return == "screening"){
+    return(out.screening1)
+  }
+
   ###########################################       
   ## Step ii: testing
   ## 
@@ -187,7 +195,7 @@ print("Is Pval known at this point?")
   ## 
   ###########################################
 
-if (testing) {
+#if (testing) {
   
   #-----------------------------------------------------
   # Third part: Run a GAMLSS with log of expr+1.
@@ -238,7 +246,11 @@ if (testing) {
   # Proportion of genes kept after FDR correction and removing negative sigma estimates
   message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
   
-}
+#}
+  if(return == "testing"){
+    return(out.screening2)
+  }
+  
 
 ###########################################       
 ## Step iii: correcting
@@ -249,7 +261,7 @@ if (testing) {
 ## 
 ###########################################
 
-if (correcting) {
+#if (correcting) {
   
   
   #----------------------------------------------------
@@ -291,10 +303,9 @@ if (correcting) {
   
 # Columns have to be renamed again!  
   
-  
   return(list(Coefficients = out.coefficients,
               `Corrected output` = out.corrected))
 
-}
+#}
 }
 
