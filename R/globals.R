@@ -3,7 +3,7 @@
 if (base::getRversion() >= "2.15.1") {
   utils::globalVariables(c(
     "id", "tv", "TPM",
-    "gene", 
+    "gene", "expr", 
     "Pval", "Estimate", "Pval.sidak", "Pval.fdr",
     "NO", "Part",
     "Variable"

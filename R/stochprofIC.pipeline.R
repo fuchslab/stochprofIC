@@ -5,9 +5,10 @@
 #' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
 #' in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
 #' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, 
-#' # and the second based on log expr+1 without trimming.
+#' and the second based on log expr+1 without trimming.
 #'
-#' ### Merce, please check the description of the next lines for correctness.
+#' TODO: check the description of the next lines for correctness.
+#' TODO: needed a description of the two levels in parameter covariates
 #'
 #' @encoding UTF-8
 #' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
@@ -15,12 +16,6 @@
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
 #' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.
 #' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
-#' 
-#' Needed: description of these two levels
-#' 
-#' ### stop checking here (I have to continue later)
-#' 
-#' 
 #' @param log.1st Logical value indicating whether a log transformation should be performed in the first GAMLSS. Defaults to FALSE.
 #' @param log.2nd Logical value indicating whether a log transformation should be performed in the second GAMLSS. Defaults to TRUE.
 #' @param add1.1st Logical value indicating whether a unit should be added to expr (expr+1) in the first GAMLSS. Defaults to FALSE.
