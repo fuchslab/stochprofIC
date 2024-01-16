@@ -20,15 +20,21 @@ devtools::install_github("fuchslab/stochprofIC")
 ```
 ---
 
+
+## Documentation
+
 There are two vignettes with examples on how to clean and arrange datasets for the pipeline and on how to proceed with the pipeline that can be viewed using:
 ```
 vignette('data_preparation')
 vignette('data_analysis')
 ```
 
+
+## Datasets
+
 We demonstrate the usage of the pipeline on two subsets (50 genes) of the following data sets:
 
-- ```glioma```
+### `glioma`
 
   which was published along this paper:
   
@@ -49,7 +55,7 @@ The dataset, ready for the pipeline, can be accessed by:
 data(glioma)
 ```
   
-- ```breast.cancer```
+### `breast.cancer`
 
   which was published along this paper:
   
