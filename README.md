@@ -20,7 +20,7 @@ devtools::install_github("fuchslab/stochprofIC")
 ```
 ---
 
-We demonstrate the usage of the pipeline on two data sets:
+We demonstrate the usage of the pipeline on two subsets (50 genes) of the following data sets:
 
 - ```glioma```
 
@@ -38,7 +38,7 @@ We demonstrate the usage of the pipeline on two data sets:
   
   (accessed as of Apr 06, 2021)
   
-- ```breastcancer```
+- ```breast.cancer```
 
   which was published along this paper:
   
