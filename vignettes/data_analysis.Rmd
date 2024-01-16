@@ -1,30 +1,60 @@
-# make all required functions known
+---
+title: "stochprofIC: Example on data analysis"
+author: "Mercè Garí"
+date: "`r format(Sys.time(), '%d/%m/%Y')` - Version `r packageVersion('stochprofIC')`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{stochprofIC: Example on data analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-source("R/stochprofIC.pipeline.R")
-source("R/stochprofIC.gamlss.R")
-source("R/extract.sidak.R")
-source("R/extract.bonferroni.R")
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(stochprofIC)
+```
 
-#install.packages("BiocManager")
-#BiocManager::install("multtest")
 
-require(gamlss)
-require(dplyr)
-require(multtest)
+```{r}
+#
+## make all required functions known
+#
+#source("R/stochprofIC.pipeline.R")
+#source("R/stochprofIC.gamlss.R")
+#source("R/extract.sidak.R")
+#source("R/extract.bonferroni.R")
+#
+##install.packages("BiocManager")
+##BiocManager::install("multtest")
+#
+#require(gamlss)
+#require(dplyr)
+#require(multtest)
+```
 
-# load breast cancer data and apply pipeline
+Load breast cancer data and apply pipeline
 
-load("data/breast-cancer-data-ready-to-pipeline.RData")
-View(breast.cancer)
+```{r}
+data(breast.cancer)
+#load("data/breast-cancer-data-ready-to-pipeline.RData")
+#View(breast.cancer)
+breast.cancer
+# todo, show breast.cancer, not View()
+```
 
-# Select only 50 genes for testing
-breast.cancer <- breast.cancer %>%
-  filter(gene %in% levels(gene)[1:50]) %>%
-  droplevels()
+<!--
+#Select only 50 genes for testing
+#
+#```{r}
+#breast.cancer <- breast.cancer %>%
+#  filter(gene %in% levels(gene)[1:50]) %>%
+#  droplevels()
+#```
+-->
 
-## for testing
-#colnames(breast.cancer)[5] <- c("hamster")
+FOR testing
 
+```{r, echo = TRUE, include = FALSE}
 screening.test <- stochprofIC.pipeline(d = breast.cancer,
                 expr = "TPM",
                 gene = "gene", 
@@ -41,11 +71,16 @@ screening.test <- stochprofIC.pipeline(d = breast.cancer,
                 zero.value.1st = NA, zero.value.2nd = 0,
                 re.placement = "both",
                 return="screening")
-# This is correctly returning the first part of the pipeline (screening)
-# It returns the genes that passes sidak, as well as the sigma type estimates from gamlss
+```
+
+```{r}
 screening.test
+```
 
+This is correctly returning the first part of the pipeline (screening)
+It returns the genes that passes sidak, as well as the sigma type estimates from gamlss
 
+```{r, echo = TRUE, include = FALSE}
 testing.test <- stochprofIC.pipeline(d = breast.cancer,
                                        expr = "TPM",
                                        gene = "gene", 
@@ -62,12 +97,16 @@ testing.test <- stochprofIC.pipeline(d = breast.cancer,
                                        zero.value.1st = NA, zero.value.2nd = 0,
                                        re.placement = "both",
                                        return="testing")
+```
 
-# This is correctly returning the second part of the pipeline (testing)
-# It returns the genes that passes FDR, as well as the sigma type estimates from gamlss
+```{r}
 testing.test
+```
 
+This is correctly returning the second part of the pipeline (testing)
+It returns the genes that passes FDR, as well as the sigma type estimates from gamlss
 
+```{r, echo = TRUE, include = FALSE}
 correcting.inferring.test <- stochprofIC.pipeline(d = breast.cancer,
                                        expr = "TPM",
                                        gene = "gene", 
@@ -84,59 +123,75 @@ correcting.inferring.test <- stochprofIC.pipeline(d = breast.cancer,
                                        zero.value.1st = NA, zero.value.2nd = 0,
                                        re.placement = "both",
                                        return="correcting&inferring")
-# This is correctly returning the last part of the pipeline (correcting&inferring)
-# It returns a list with two objects:
-# All the gamlss estimates from the final selected genes
-# The corrected output data together with the non-corrected (TPM) for comparison.
+```
+
+```{r}
 correcting.inferring.test
-# This second output (Corrected output) is the one that can be run in stochprofML
+```
+
+This is correctly returning the last part of the pipeline (correcting&inferring)
+It returns a list with two objects:
+All the gamlss estimates from the final selected genes
+The corrected output data together with the non-corrected (TPM) for comparison.
+
+This second output (Corrected output) is the one that can be run in stochprofML
+```{r}
 correcting.inferring.test$`Corrected output`
+```
 
 
 
 
-### If we want to save the full output of the stochprofIC.pipeline
-### 
-### The following call does not work yet because columns have to be re-renamed again.
+If we want to save the full output of the stochprofIC.pipeline
+
+The following call does not work yet because columns have to be re-renamed again.
+
+```{r, echo = TRUE, include = FALSE}
 full.output <- stochprofIC.pipeline(d = breast.cancer,
                                     expr = "TPM",
                                     type = "type",
                                     covariates = "biopsy",
                                     gene = "gene")
+```
 
+```{r}
 full.output$Coefficients
 full.output$Corrected
+```
 
 
-
-
-
-# load glioma data and apply pipeline
-# 
-load("data/glioma-data-ready-to-pipeline.RData")
-View(glioma)
-
-# Select only 50 genes for testing
-glioma <- glioma %>%
-  filter(time %in% "dpi12") %>%
-  filter(gene %in% levels(gene)[1:50]) %>%
-  droplevels()
-
-stochprofIC.pipeline(d = glioma,
-               expr = "TPM",
-               type = "type",
-               covariates = "sex",
-               gene = "gene", 
-               re = NA,
-               log.1st = FALSE, 
-               log.2nd = TRUE,
-               add1.1st = FALSE, 
-               add1.2nd = TRUE,
-               trim.1st = 3, 
-               trim.2nd = NA,
-               zeros.1st = TRUE, zeros.2nd = FALSE,
-               zero.value.1st = NA, zero.value.2nd = 0,
-               re.placement = "both")
-
-
-  
+<!--
+## Glioma
+#
+#load glioma data and apply pipeline
+#```{r}
+#data(glioma)
+##load("data/glioma-data-ready-to-pipeline.RData")
+#glioma
+#```
+#
+#
+#```{r, echo = TRUE, include = FALSE}
+#glioma.pipeline <-  stochprofIC.pipeline(d = glioma,
+#               expr = "TPM",
+#               type = "type",
+#               covariates = "sex",
+#               gene = "gene", 
+#               re = NA,
+#               log.1st = FALSE, 
+#               log.2nd = TRUE,
+#               add1.1st = FALSE, 
+#               add1.2nd = TRUE,
+#               trim.1st = 3, 
+#               trim.2nd = NA,
+#               zeros.1st = TRUE, zeros.2nd = FALSE,
+#               zero.value.1st = NA, zero.value.2nd = 0,
+#               re.placement = "both")
+#```
+#
+#```{r}
+#glioma.pipeline$output
+#```
+#
+#
+-->
