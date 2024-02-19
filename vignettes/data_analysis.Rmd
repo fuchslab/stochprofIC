@@ -54,7 +54,7 @@ breast.cancer
 
 FOR testing
 
-```{r, echo = TRUE, include = FALSE}
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 screening.test <- stochprofIC.pipeline(d = breast.cancer,
                 expr = "TPM",
                 gene = "gene", 
@@ -80,7 +80,7 @@ screening.test
 This is correctly returning the first part of the pipeline (screening)
 It returns the genes that passes sidak, as well as the sigma type estimates from gamlss
 
-```{r, echo = TRUE, include = FALSE}
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 testing.test <- stochprofIC.pipeline(d = breast.cancer,
                                        expr = "TPM",
                                        gene = "gene", 
@@ -106,7 +106,7 @@ testing.test
 This is correctly returning the second part of the pipeline (testing)
 It returns the genes that passes FDR, as well as the sigma type estimates from gamlss
 
-```{r, echo = TRUE, include = FALSE}
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 correcting.inferring.test <- stochprofIC.pipeline(d = breast.cancer,
                                        expr = "TPM",
                                        gene = "gene", 
@@ -146,7 +146,7 @@ If we want to save the full output of the stochprofIC.pipeline
 
 The following call does not work yet because columns have to be re-renamed again.
 
-```{r, echo = TRUE, include = FALSE}
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 full.output <- stochprofIC.pipeline(d = breast.cancer,
                                     expr = "TPM",
                                     type = "type",
@@ -171,7 +171,7 @@ full.output$Corrected
 #```
 #
 #
-#```{r, echo = TRUE, include = FALSE}
+#```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 #glioma.pipeline <-  stochprofIC.pipeline(d = glioma,
 #               expr = "TPM",
 #               type = "type",

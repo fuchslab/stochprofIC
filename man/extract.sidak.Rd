@@ -4,7 +4,7 @@
 \alias{extract.sidak}
 \title{Extract Sidak Corrected p-values as a simple vector}
 \usage{
-\method{extract}{sidak}(x)
+extract.sidak(x)
 }
 \arguments{
 \item{x}{a collection of p-values to be corrected using the Sidak correction}

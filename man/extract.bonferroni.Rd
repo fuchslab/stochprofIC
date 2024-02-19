@@ -4,7 +4,7 @@
 \alias{extract.bonferroni}
 \title{Extract Bonferroni Corrected p-values as a simple vector}
 \usage{
-\method{extract}{bonferroni}(x)
+extract.bonferroni(x)
 }
 \arguments{
 \item{x}{a collection of p-values to be corrected using the Bonferroni correction}
