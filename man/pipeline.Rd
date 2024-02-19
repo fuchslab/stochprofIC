@@ -3,6 +3,8 @@
 \docType{package}
 \encoding{UTF-8}
 \name{pipeline}
+\alias{stochprofIC}
+\alias{stochprofIC-package}
 \alias{pipeline}
 \title{Tools facilitating a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.}
 \description{
@@ -10,4 +12,8 @@ Development of a pipeline to detect/parameterize transcriptional heterogeneity o
 }
 \references{
 \url{http://mercegari.net/}.
+}
+\author{
+\strong{Maintainer}: Mercè Garí \email{mercegari@gmail.com} (\href{https://orcid.org/0000-0001-6903-0732}{ORCID})
+
 }

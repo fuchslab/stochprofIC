@@ -6,6 +6,10 @@
 \usage{
 stochprofIC.gamlss(
   d,
+  expr,
+  gene,
+  type,
+  covariates = NULL,
   return = "simple",
   log = NULL,
   trim = NULL,
@@ -13,11 +17,20 @@ stochprofIC.gamlss(
   zero.value = NULL,
   add.1 = NULL,
   re = NA,
-  re.placement = "both"
+  re.placement = "both",
+  input.cleaned = FALSE
 )
 }
 \arguments{
-\item{d}{Tidy data frame that has already been processed by stochprofIC.pipeline and contains a single gene.}
+\item{d}{Tidy data frame that has already been processed and that contains a single gene. If the data has not previously been arranged, the argument \code{input.cleaned} can be set to TRUE and then the input is arranged before the analysis.}
+
+\item{expr}{Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.}
+
+\item{gene}{Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.}
+
+\item{type}{Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.}
+
+\item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
 
 \item{return}{Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values}
 
@@ -34,6 +47,8 @@ stochprofIC.gamlss(
 \item{re}{See \code{\link{stochprofIC.pipeline}}. Not yet implemented.}
 
 \item{re.placement}{See \code{\link{stochprofIC.pipeline}}. Not yet implemented.}
+
+\item{input.cleaned}{Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.}
 }
 \value{
 Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").

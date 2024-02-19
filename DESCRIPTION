@@ -1,6 +1,6 @@
 Package: stochprofIC
 Title: Run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data
-Version: 0.2
+Version: 0.3
 Authors@R: 
     person("Mercè", "Garí", , "mercegari@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6903-0732"))
@@ -22,5 +22,5 @@ Suggests:
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr
