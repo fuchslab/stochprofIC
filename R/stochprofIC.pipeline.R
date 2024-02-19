@@ -54,63 +54,11 @@ stochprofIC.pipeline <- function(d,
                     # with the default as "correcting&inferring"
                             return = "correcting&inferring") {
 
-  #############################################################
-  ## Rearranging input matrix and checking of correct format ##
-  #############################################################
-  
-  # Add an additional column "id", assigning an internal ID to each row
-  d <- dplyr::mutate(d, id = 1:dplyr::n())
-  
-  # Ensure the column containing the gene expression values is called "expr"
-  d <- dplyr::rename(d, expr = !!expr)
-  
-  # Ensure that "expr" contains numerical value
-  if (!is.double(d$expr)) {
-    stop("'expr' must contain values of type double.")
-  }
-  
-  # Ensure the column containing the gene names is called "gene"
-  d <- dplyr::rename(d, gene = !!gene)
-  
-  # Ensure the column containing the measurement type is called "type"
-  d <- dplyr::rename(d, type = !!type)
-  
-
-# Christiane: Code checking to be continues from here
-
-  # Parser technical variation, ensure that it is a factor with only 2 levels
-  # and that its name is 'type'
-  if (!is.factor(d$type)) {
-    stop("'type' must be the name of an existing factor, 
-         whose first level refers to the pool-and-split controls.")
-  }
-  if (length(levels(d$type)) != 2) {
-    stop("The technical variation must be a factor with strictly 2 levels, 
-         the first one referring to the pool-and-split controls, 
-         and the second one to the small-pool samples.")
-  }
-
-  # Ensure that for technical variation (type) zero and one are created
-  # and that the resulting value is an integer (with 1L)
-  d <- d %>% dplyr::mutate(type = as.integer(type) - 1L)
-
-  # Parse the covariates by first selecting them 
-  # and separating them in a different object named 'd.cv'
-  d.cv <- dplyr::select(d, id, tidyselect::all_of(covariates))
-  # Ensure that all of them are factors
-  class.covariates <- unlist(lapply(dplyr::select(d.cv, -id), class))
-  if (length(class.covariates) != length(which(class.covariates %in% "factor"))) {
-    stop("All variables in 'covariates' must be factors.")
-  }
-  # Create a model matrix with all covariates, and exclude the intercept
-  d.mm <- data.frame(stats::model.matrix(~ ., data = dplyr::select(d.cv, -id))[,-1])
-  # Keep only the relevant variables in a tidy format
-  # From now on, 'D' is the result of arranging and checking the input
-  # provided by the user. It contains the variables in a specific order: id, gene, expr, type, covariates.
-  D <- dplyr::select(d, id, gene, expr, type) %>%
-    dplyr::left_join(dplyr::mutate(d.mm, id = 1:dplyr::n()))
-  # 
+  D <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   N.total.genes <- length(unique(D$gene))
+
+  # Keep a record of genes that give errors
+  error.genes <- NULL
     
   ###########################################       
   ## Run the chosen steps of the pipeline: 
@@ -140,19 +88,27 @@ stochprofIC.pipeline <- function(d,
   #
   out.gamlss1 <- NULL
   list.genes <- levels(D$gene)
+  names.covariates <- names(D)[names(D) %in% c("id", "gene", "expr", "type")]
   for (g in 1:length(list.genes)) {
     gene.now <- list.genes[g]
     d.gene <- D %>%
       filter(gene == gene.now)
-    out.gamlss1 <- bind_rows(out.gamlss1, 
-                   bind_cols(gene = gene.now,
-                   stochprofIC.gamlss(d.gene,
-                               re = re, re.placement = re.placement,
-                               log = log.1st,
-                               add.1 = add1.1st,
-                               trim = trim.1st, 
-                               zeros = zeros.1st, 
-                               zero.value = zero.value.1st)))
+    go <- NULL
+    go <- stochprofIC.gamlss(d.gene,
+                             expr = "expr", type = "type", gene = "gene", covariates = names.covariates,
+                             re = re, re.placement = re.placement,
+                             log = log.1st,
+                             add.1 = add1.1st,
+                             trim = trim.1st, 
+                             zeros = zeros.1st, 
+                             zero.value = zero.value.1st,
+                             input.cleaned = TRUE)
+    if (is.null(go)) {
+      error.genes <- c(error.genes, gene.now)
+    } else {
+      out.gamlss1 <- bind_rows(out.gamlss1, 
+                     bind_cols(gene = gene.now, go))
+    }
   }
 
   
@@ -200,17 +156,24 @@ stochprofIC.pipeline <- function(d,
   out.gamlss2 <- NULL
   for(g in 1:length(levels(d.post.sidak$gene))){
     gene.now <- levels(d.post.sidak$gene)[g]
-    out.gamlss2 <- dplyr::bind_rows(out.gamlss2, 
-          dplyr::bind_cols(gene = levels(d.post.sidak$gene)[g],
-            stochprofIC.gamlss(dplyr::filter(d.post.sidak, 
+    go <- NULL
+    go <- stochprofIC.gamlss(dplyr::filter(d.post.sidak, 
                        gene == levels(d.post.sidak$gene)[g]),
+                       expr = "expr", type = "type", gene = "gene",
                        re = re, re.placement = re.placement,
                        log = log.2nd,
                        add.1 = add1.2nd,
                        trim = trim.2nd, 
                        zeros = zeros.2nd, 
                        zero.value = zero.value.2nd,
-                       return = "simple")))
+                       return = "simple",
+                       input.cleaned = TRUE)
+    if (is.null(go)) {
+      error.genes <- c(error.genes, gene.now)
+    } else {
+      out.gamlss2 <- dplyr::bind_rows(out.gamlss2, 
+            dplyr::bind_cols(gene = levels(d.post.sidak$gene)[g], go))
+    }
   }
   
   #-----------------------------------------------------
@@ -255,26 +218,34 @@ stochprofIC.pipeline <- function(d,
   d.post.fdr <- D %>%
     dplyr::filter(gene %in% out.screening2$gene) %>%
     droplevels()
+
   
   out.corrected <- out.coefficients <- NULL
   for(g in 1:length(levels(d.post.fdr$gene))){
     d.now <- d.post.fdr %>%
       dplyr::filter(gene == levels(d.post.fdr$gene)[g])
+    out.full <- NULL
     out.full <- stochprofIC.gamlss(d.now,
+                                   expr = "expr", type = "type", gene = "gene",
                            return = "full", 
                            re = re, re.placement = re.placement,
                            log = log.2nd,
                            add.1 = add1.2nd,
                            trim = trim.2nd, 
                            zeros = zeros.2nd, 
-                           zero.value = zero.value.2nd)
+                           zero.value = zero.value.2nd,
+                           input.cleaned = TRUE)
 
-    out.corrected <- dplyr::bind_rows(out.corrected, 
-                               tibble::tibble(gene = levels(d.post.fdr$gene)[g],
-                                      out.full$exprs))   # Christiane: maybe change the name "exprs" in the gamlss function -- a bit confusing
-    out.coefficients <- dplyr::bind_rows(out.coefficients, 
-                                  tibble::tibble(gene = levels(d.post.fdr$gene)[g],
-                                  out.full$coefficients))
+    if (is.null(out.full)) {
+      error.genes <- c(error.genes, levels(d.post.fdr$gene)[g])
+    } else {
+      out.corrected <- dplyr::bind_rows(out.corrected, 
+                                 tibble::tibble(gene = levels(d.post.fdr$gene)[g],
+                                        out.full$exprs))   # Christiane: maybe change the name "exprs" in the gamlss function -- a bit confusing
+      out.coefficients <- dplyr::bind_rows(out.coefficients, 
+                                    tibble::tibble(gene = levels(d.post.fdr$gene)[g],
+                                    out.full$coefficients))
+    }
   }
   
   out.corrected <- out.corrected %>%
@@ -293,7 +264,8 @@ stochprofIC.pipeline <- function(d,
   message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
   
   return(list(Coefficients = out.coefficients,
-              `Corrected output` = out.corrected))
+              `Corrected output` = out.corrected,
+              `Genes with error` = unique(error.genes)))
 
 #}
 }

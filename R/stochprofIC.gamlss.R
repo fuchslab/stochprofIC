@@ -3,7 +3,11 @@
 #' Internal function to facilitate the call to gamlss() using the necessary
 #' parts for stochprofIC.pipeline
 #'
-#' @param d Tidy data frame that has already been processed by stochprofIC.pipeline and contains a single gene.
+#' @param d Tidy data frame that has already been processed and that contains a single gene. If the data has not previously been arranged, the argument \code{input.cleaned} can be set to TRUE and then the input is arranged before the analysis.
+#' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
+#' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
+#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.
+#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
 #' @param return Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values
 #' @param log See \code{\link{stochprofIC.pipeline}}
 #' @param trim See \code{\link{stochprofIC.pipeline}}
@@ -12,13 +16,22 @@
 #' @param add.1 See \code{\link{stochprofIC.pipeline}}
 #' @param re See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @param re.placement See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
+#' @param input.cleaned Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.
 #' @return Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
 stochprofIC.gamlss <- function(d,
+                       expr,
+                       gene, 
+                       type,
+                       covariates = NULL,
                        return = "simple",
                        log = NULL, trim = NULL, 
                        zeros = NULL, zero.value = NULL, add.1 = NULL,
-                       re = NA, re.placement = "both") {
+                       re = NA, re.placement = "both",
+                       input.cleaned = FALSE) {
   
+  if (!input.cleaned) {
+    d <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
+  }
 # The following lines assume that the column names are exactly as defined in stochprofIC.pipeline. We should not do that.
   ## I don't understand why not... I guess there are 2 issues to discuss here:
   ## First, do we really want this function to work independently of the stochprofIC.pipeline? If not, the rest of the discussion is over.
@@ -71,10 +84,10 @@ stochprofIC.gamlss <- function(d,
                                                     collapse = " + ")))
   
   # Estimation of the GAMLSS
-  m <- invisible(try(gamlss::gamlss(formula = model.equation.mu, 
+  m <- invisible(try(suppressMessages(gamlss::gamlss(formula = model.equation.mu, 
                                     sigma.formula = model.equation.sigma, 
                                     data = d, family = gamlss.dist::NO, 
-                                    control = gamlss::gamlss.control(trace=FALSE))))
+                                    control = gamlss::gamlss.control(trace=FALSE))))) 
   
   
 ## I (CF) don't know what the folloing lines are doing
@@ -85,11 +98,13 @@ stochprofIC.gamlss <- function(d,
   
   if(return == "simple") {
     if(inherits(m, "try-error")){
-      return(message("ERROR"))
+      return(message(paste0("ERROR", " in gene ", unique(d$gene))))
     } else{
-      sm <- invisible(try(summary(m)))
+      #sm <- invisible(try(summary(m)))
+      sm <- try(suppressMessages(summary(m) ))
+      #sm <- invisible(try(summary(m, type = "qr")))
       if(inherits(sm, "try-error")){
-        return(message("ERROR"))
+        return(message(paste0("ERROR", " in gene ", unique(d$gene))))
       } else {
         out <- sm %>%
           as.data.frame() %>% 
@@ -105,14 +120,16 @@ stochprofIC.gamlss <- function(d,
     }
   } else{
     sm <- invisible(try(summary(m)))
+    #sm <- invisible(try(summary(m, type = "qr")))
     if(inherits(sm, "try-error")){
-      return(message("ERROR"))
+      return(message(paste0("ERROR", " in gene ", unique(d$gene))))
     } else {
       out <- sm %>%
         as.data.frame() %>% 
         tibble::rownames_to_column("Variable") %>%
         dplyr::mutate(Part = gl(2,(dplyr::n()/2), labels = c("Mu", "Sigma"))) %>%
-        dplyr::select(Variable, Part, Estimate)
+        dplyr::select(Variable, Part, Estimate) #%>%
+        #dplyr::filter(!grepl('Intercept', Variable))
       mu.vector <- out %>%
         dplyr::filter(Part == "Mu") %>%
         dplyr::select(Variable, Estimate) %>%
