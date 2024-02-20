@@ -32,6 +32,7 @@ stochprofIC.gamlss <- function(d,
   if (!input.cleaned) {
     d <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   }
+  gene.now <- unique(d$gene)
 # The following lines assume that the column names are exactly as defined in stochprofIC.pipeline. We should not do that.
   ## I don't understand why not... I guess there are 2 issues to discuss here:
   ## First, do we really want this function to work independently of the stochprofIC.pipeline? If not, the rest of the discussion is over.
@@ -84,10 +85,14 @@ stochprofIC.gamlss <- function(d,
                                                     collapse = " + ")))
   
   # Estimation of the GAMLSS
-  m <- invisible(try(suppressMessages(gamlss::gamlss(formula = model.equation.mu, 
-                                    sigma.formula = model.equation.sigma, 
-                                    data = d, family = gamlss.dist::NO, 
-                                    control = gamlss::gamlss.control(trace=FALSE))))) 
+  #m <- invisible(try(suppressMessages(gamlss::gamlss(formula = model.equation.mu, 
+  #                                  sigma.formula = model.equation.sigma, 
+  #                                  data = d, family = gamlss.dist::NO, 
+  #                                  control = gamlss::gamlss.control(trace=FALSE))))) 
+  capture.output({m <- try(suppressWarnings(gamlss::gamlss(formula = model.equation.mu, 
+                          sigma.formula = model.equation.sigma, 
+                          data = d, family = gamlss.dist::NO, 
+                          control = gamlss::gamlss.control(trace=FALSE)))) }, file = nullfile())
   
   
 ## I (CF) don't know what the folloing lines are doing
@@ -98,13 +103,14 @@ stochprofIC.gamlss <- function(d,
   
   if(return == "simple") {
     if(inherits(m, "try-error")){
-      return(message(paste0("ERROR", " in gene ", unique(d$gene))))
+      return(message(paste0("  ERROR", " in gene ", gene.now)))
     } else{
       #sm <- invisible(try(summary(m)))
-      sm <- try(suppressMessages(summary(m) ))
+      #sm <- try(suppressMessages(summary(m) ))
       #sm <- invisible(try(summary(m, type = "qr")))
+      capture.output({ sm <- try(suppressWarnings(summary(m))) }, file = nullfile()) 
       if(inherits(sm, "try-error")){
-        return(message(paste0("ERROR", " in gene ", unique(d$gene))))
+        return(message(paste0("  ERROR", " in gene ", gene.now)))
       } else {
         out <- sm %>%
           as.data.frame() %>% 
@@ -119,17 +125,20 @@ stochprofIC.gamlss <- function(d,
       }
     }
   } else{
-    sm <- invisible(try(summary(m)))
+    #sm <- invisible(try(summary(m)))
     #sm <- invisible(try(summary(m, type = "qr")))
+    capture.output({ sm <- try(suppressWarnings(summary(m))) }, file = nullfile())
     if(inherits(sm, "try-error")){
-      return(message(paste0("ERROR", " in gene ", unique(d$gene))))
+      return(message(paste0("  ERROR", " in gene ", gene.now)))
     } else {
+      keep.rownames <- rownames(sm)
       out <- sm %>%
-        as.data.frame() %>% 
-        tibble::rownames_to_column("Variable") %>%
+        base::as.data.frame() %>% 
+        dplyr::mutate(Variable = keep.rownames) %>% 
         dplyr::mutate(Part = gl(2,(dplyr::n()/2), labels = c("Mu", "Sigma"))) %>%
         dplyr::select(Variable, Part, Estimate) #%>%
         #dplyr::filter(!grepl('Intercept', Variable))
+      rownames(out) <- NULL
       mu.vector <- out %>%
         dplyr::filter(Part == "Mu") %>%
         dplyr::select(Variable, Estimate) %>%
@@ -164,6 +173,10 @@ stochprofIC.gamlss <- function(d,
       mu.part <- mu.vector[1] + (as.matrix(d[,-c(1,2,3)])%*% mu.vector[-1])
       sigma.part <- sigma.vector[1] + (as.matrix(d[,-c(1,2,3)]) %*% sigma.vector[-1])
       correction <- exp(((d$expr - mu.part) / exp(sigma.part)))[,1]
+
+      # Remove intercepts from the return
+      out <- out %>% 
+        dplyr::filter(!grepl('Intercept', Variable))
       
       return(list(coefficients = out, exprs = tibble::tibble(`Non-corrected` = d$expr[d$type == 1],
                                                             Corrected = correction[d$type == 1])))
