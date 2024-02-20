@@ -32,7 +32,7 @@ library(stochprofIC)
 #require(multtest)
 ```
 
-Load breast cancer data and apply pipeline
+Load breast cancer data and apply the pipeline.
 
 ```{r}
 data(breast.cancer)
@@ -77,8 +77,9 @@ screening.test <- stochprofIC.pipeline(d = breast.cancer,
 screening.test
 ```
 
-This is correctly returning the first part of the pipeline (screening)
-It returns the genes that passes sidak, as well as the sigma type estimates from gamlss
+This is correctly returning the first part of the pipeline (screening).
+
+It returns the genes that passes Sidak correction, as well as the sigma type estimates from gamlss.
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 testing.test <- stochprofIC.pipeline(d = breast.cancer,
@@ -103,8 +104,9 @@ testing.test <- stochprofIC.pipeline(d = breast.cancer,
 testing.test
 ```
 
-This is correctly returning the second part of the pipeline (testing)
-It returns the genes that passes FDR, as well as the sigma type estimates from gamlss
+This is correctly returning the second part of the pipeline (testing).
+
+It returns the genes that passes False Discovery Rate (FDR), as well as the sigma type estimates from gamlss.
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 correcting.inferring.test <- stochprofIC.pipeline(d = breast.cancer,
@@ -129,22 +131,19 @@ correcting.inferring.test <- stochprofIC.pipeline(d = breast.cancer,
 correcting.inferring.test
 ```
 
-This is correctly returning the last part of the pipeline (correcting&inferring)
-It returns a list with two objects:
-All the gamlss estimates from the final selected genes
-The corrected output data together with the non-corrected (TPM) for comparison.
+This is correctly returning the last part of the pipeline (correcting&inferring).
 
-This second output (Corrected output) is the one that can be run in stochprofML
+It returns a list with three objects:
+- All the gamlss estimates from the final selected genes ('Coefficients')
+- The corrected output data together with the non-corrected (TPM), for comparison ('Corrected output'). This output can be used for forthcoming analyses (e.g. stochprofML).
+- A list of genes with errors, meaning that no gamlss model has been computed due to unknown issues.
+
 ```{r}
 correcting.inferring.test$`Corrected output`
+correcting.inferring.test$`Coefficients`
 ```
 
-
-
-
-If we want to save the full output of the stochprofIC.pipeline
-
-The following call does not work yet because columns have to be re-renamed again.
+If we want to save the full output of the stochprofIC.pipeline:
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 full.output <- stochprofIC.pipeline(d = breast.cancer,
@@ -157,41 +156,6 @@ full.output <- stochprofIC.pipeline(d = breast.cancer,
 ```{r}
 full.output$Coefficients
 full.output$Corrected
+full.output$`Genes with error`
 ```
 
-
-<!--
-## Glioma
-#
-#load glioma data and apply pipeline
-#```{r}
-#data(glioma)
-##load("data/glioma-data-ready-to-pipeline.RData")
-#glioma
-#```
-#
-#
-#```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
-#glioma.pipeline <-  stochprofIC.pipeline(d = glioma,
-#               expr = "TPM",
-#               type = "type",
-#               covariates = "sex",
-#               gene = "gene", 
-#               re = NA,
-#               log.1st = FALSE, 
-#               log.2nd = TRUE,
-#               add1.1st = FALSE, 
-#               add1.2nd = TRUE,
-#               trim.1st = 3, 
-#               trim.2nd = NA,
-#               zeros.1st = TRUE, zeros.2nd = FALSE,
-#               zero.value.1st = NA, zero.value.2nd = 0,
-#               re.placement = "both")
-#```
-#
-#```{r}
-#glioma.pipeline$output
-#```
-#
-#
--->
