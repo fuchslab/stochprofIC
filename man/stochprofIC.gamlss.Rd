@@ -11,11 +11,11 @@ stochprofIC.gamlss(
   type,
   covariates = NULL,
   return = "simple",
-  log = NULL,
-  trim = NULL,
-  zeros = NULL,
-  zero.value = NULL,
-  add.1 = NULL,
+  log = TRUE,
+  trim = NA,
+  zeros = FALSE,
+  zero.value = 0,
+  add.1 = TRUE,
   re = NA,
   re.placement = "both",
   input.cleaned = FALSE
@@ -51,7 +51,7 @@ stochprofIC.gamlss(
 \item{input.cleaned}{Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.}
 }
 \value{
-Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
+Depending on the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
 }
 \description{
 Internal function to facilitate the call to gamlss() using the necessary

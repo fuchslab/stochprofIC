@@ -10,6 +10,7 @@
 #' @importFrom gamlss.dist NO
 #' @importFrom mutoss sidak bonferroni
 #' @importFrom stats formula model.matrix p.adjust
+#' @importFrom utils capture.output
 #' @importFrom tidyselect all_of
 #' @docType package
 #' @name pipeline

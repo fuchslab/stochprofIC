@@ -67,19 +67,17 @@ stochprofIC.pipeline(
 A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
 }
 \description{
-Given a tidy data frame with X, X, X, run a pipeline based on a generalized additive model
-for location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity
+Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and
+transcripts per milion (TPM), run a pipeline based on a generalized additive model for
+location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity
 of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
 in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
 the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs,
 and the second based on log expr+1 without trimming.
 }
-\details{
-TODO: check the description of the next lines for correctness.
-TODO: needed a description of the two levels in parameter covariates
-}
 \examples{
 \dontrun{
-stochprofIC.pipeline()
+data(glioma)
+stochprofIC.pipeline(glioma)
 }
 }
