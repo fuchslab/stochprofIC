@@ -17,15 +17,15 @@
 #' @param re See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @param re.placement See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @param input.cleaned Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.
-#' @return Depending of the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
+#' @return Depending on the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
 stochprofIC.gamlss <- function(d,
                        expr,
                        gene, 
                        type,
                        covariates = NULL,
                        return = "simple",
-                       log = NULL, trim = NULL, 
-                       zeros = NULL, zero.value = NULL, add.1 = NULL,
+                       log = TRUE, trim = NA, 
+                       zeros = FALSE, zero.value = 0, add.1 = TRUE,
                        re = NA, re.placement = "both",
                        input.cleaned = FALSE) {
   
@@ -33,13 +33,7 @@ stochprofIC.gamlss <- function(d,
     d <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   }
   gene.now <- unique(d$gene)
-# The following lines assume that the column names are exactly as defined in stochprofIC.pipeline. We should not do that.
-  ## I don't understand why not... I guess there are 2 issues to discuss here:
-  ## First, do we really want this function to work independently of the stochprofIC.pipeline? If not, the rest of the discussion is over.
-  ## I personally think that there is no need to have this function exported as a general function in the package. 
-  ## However (and second), if we want to have this stochprofIC.gamlss as a general function in the package, then certainly
-  ## we need to ensure that the input object contains the names that we want. I can improve the documentation (line 6).
-  
+
   # Deal with trimming the data
   # by removing the specific number of observations
   # in both technical variation 'type' groups
@@ -85,29 +79,15 @@ stochprofIC.gamlss <- function(d,
                                                     collapse = " + ")))
   
   # Estimation of the GAMLSS
-  #m <- invisible(try(suppressMessages(gamlss::gamlss(formula = model.equation.mu, 
-  #                                  sigma.formula = model.equation.sigma, 
-  #                                  data = d, family = gamlss.dist::NO, 
-  #                                  control = gamlss::gamlss.control(trace=FALSE))))) 
   capture.output({m <- try(suppressWarnings(gamlss::gamlss(formula = model.equation.mu, 
                           sigma.formula = model.equation.sigma, 
                           data = d, family = gamlss.dist::NO, 
                           control = gamlss::gamlss.control(trace=FALSE)))) }, file = nullfile())
   
-  
-## I (CF) don't know what the folloing lines are doing
-  
-## Why try and error here?  
-  ## Try and error allows us to continue with the function when gamlss has failed
-  ## or not converged or not produced all the necessary estimates.
-  
   if(return == "simple") {
     if(inherits(m, "try-error")){
       return(message(paste0("  ERROR", " in gene ", gene.now)))
     } else{
-      #sm <- invisible(try(summary(m)))
-      #sm <- try(suppressMessages(summary(m) ))
-      #sm <- invisible(try(summary(m, type = "qr")))
       capture.output({ sm <- try(suppressWarnings(summary(m))) }, file = nullfile()) 
       if(inherits(sm, "try-error")){
         return(message(paste0("  ERROR", " in gene ", gene.now)))
@@ -125,8 +105,6 @@ stochprofIC.gamlss <- function(d,
       }
     }
   } else{
-    #sm <- invisible(try(summary(m)))
-    #sm <- invisible(try(summary(m, type = "qr")))
     capture.output({ sm <- try(suppressWarnings(summary(m))) }, file = nullfile())
     if(inherits(sm, "try-error")){
       return(message(paste0("  ERROR", " in gene ", gene.now)))

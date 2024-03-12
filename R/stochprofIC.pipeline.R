@@ -1,14 +1,12 @@
 #' Run the whole pipeline
 #'
-#' Given a tidy data frame with X, X, X, run a pipeline based on a generalized additive model
-#' for location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity 
+#' Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and 
+#' transcripts per milion (TPM), run a pipeline based on a generalized additive model for 
+#' location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity 
 #' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
 #' in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
 #' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, 
 #' and the second based on log expr+1 without trimming.
-#'
-#' TODO: check the description of the next lines for correctness.
-#' TODO: needed a description of the two levels in parameter covariates
 #'
 #' @encoding UTF-8
 #' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
@@ -33,11 +31,12 @@
 #' @return A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
 #' @examples
 #'\dontrun{
-#'stochprofIC.pipeline()
+#'data(glioma)
+#'stochprofIC.pipeline(glioma)
 #'}
 stochprofIC.pipeline <- function(d,
                             expr,
-                            gene, 
+                            gene,
                             type,
                             covariates = NULL,
                             re = NA, re.placement = "both",
@@ -46,9 +45,6 @@ stochprofIC.pipeline <- function(d,
                             trim.1st = 3, trim.2nd = NA,
                             zeros.1st = TRUE, zeros.2nd = FALSE,
                             zero.value.1st = NA, zero.value.2nd = 0,
-                    # the following functionality was discussed but is not yet properly implemented, not tested and not explained!
-                    # the step "inferring" is missing completely
-                            # screening=T,testing=T,correcting=T,inferring=T
                     # I suggest to have a single argument with 3 possibilities
                     # It would be return = "screening", "testing" or "correcting&inferring",
                     # with the default as "correcting&inferring"
