@@ -3,15 +3,16 @@
 \docType{data}
 \name{breast.cancer}
 \alias{breast.cancer}
-\title{Breast cancer: a dataset on  XX}
+\title{Breast cancer: a dataset on 10cRNA-seq analysis consisting on an identical algorithm applied separately to 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors.}
 \format{
-A data frame containing X suitable for being used in the pipeline.
+A data frame containing 10cRNA-seq from a subset of 50 genes, with information on 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors each, suitable for being used in the Inferring&Correcting pipeline.
 }
 \usage{
 data(breast.cancer)
 }
 \description{
-A dataset on X contining observations on X, ready for being used in the pipeline
+A dataset on 10cRNA-seq contining observations on 50 genes, with 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors each, ready for being used in the Inferring&Correcting pipeline. The original dataset, based on Singh et al., 2021 (DOI: https://doi.org/10.1158/0008-5472.CAN-20-1034) can be found in the following 
+
 }
 \examples{
 data(breast.cancer)

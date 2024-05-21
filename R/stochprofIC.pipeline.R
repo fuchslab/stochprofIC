@@ -26,7 +26,7 @@
 #' @param zero.value.2nd Numerical value with the substitute value for zero in expr, in the second GAMLSS.
 #' @param re Character string with the name of the variable that carries random effects. Not yet implemented.
 #' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
-#' @param return Character string with either "screening", "testing" or "correcting&inferring". Defaults to "correcting&inferring".
+#' @param ... Other options, mainly the details about what to return. Used internally for \code{\link{stochprofIC.screening()}} and \code{\link{stochprofIC.testing}}.
 #' @export
 #' @return A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
 #' @examples
@@ -45,10 +45,7 @@ stochprofIC.pipeline <- function(d,
                             trim.1st = 3, trim.2nd = NA,
                             zeros.1st = TRUE, zeros.2nd = FALSE,
                             zero.value.1st = NA, zero.value.2nd = 0,
-                    # I suggest to have a single argument with 3 possibilities
-                    # It would be return = "screening", "testing" or "correcting&inferring",
-                    # with the default as "correcting&inferring"
-                            return = "correcting&inferring") {
+                            return = "Correcting&Inferring") {
 
   D <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   N.total.genes <- length(unique(D$gene))
@@ -75,7 +72,6 @@ stochprofIC.pipeline <- function(d,
   ## 
   ###########################################
       
-#if (screening) {                  
   #-----------------------------------------------------
   # First call to 'stochprofIC.gamlss()'
   # do it gene by gene in a loop, and put it all back together into the object called 'out.gamlss1', 
@@ -113,7 +109,6 @@ stochprofIC.pipeline <- function(d,
   # Second part: Run a Sidak Correction of sigma-type p-values and keep only
   # sigma.type > 0 & Pval.sidak <= 0.05
   
-#print("Is Pval known at this point?")  
   out.sidak <- out.gamlss1 %>%
     dplyr::mutate(Pval.sidak = extract.sidak(Pval))
   
@@ -125,9 +120,11 @@ stochprofIC.pipeline <- function(d,
   if(return == "screening"){
     # Proportion of genes kept after sidak correction and removing negative sigma estimates
     message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
-    return(out.screening1)
+    return(list(Screening = out.screening1, 
+                `Genes with error` = unique(error.genes)))
   }
 
+  
   ###########################################       
   ## Step ii: testing
   ## 
@@ -135,7 +132,6 @@ stochprofIC.pipeline <- function(d,
   ## 
   ###########################################
 
-#if (testing) {
   
   #-----------------------------------------------------
   # Third part: Run a GAMLSS with log of expr+1.
@@ -187,24 +183,23 @@ stochprofIC.pipeline <- function(d,
   
   
   
-#}
   if(return == "testing"){
     # Proportion of genes kept after FDR correction and removing negative sigma estimates
     message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
-    return(out.screening2)
+    return(list(Testing = out.screening2, 
+                `Genes with error` = unique(error.genes)))
   }
   
 
-###########################################       
-## Step iii: correcting
-## 
-## Use the estimated GAMLSS coefficients from the previous testing step
-## for batch correction
-## (this only makes sense if testing was done)
-## 
-###########################################
+  ###########################################       
+  ## Step iii: correcting
+  ## 
+  ## Use the estimated GAMLSS coefficients from the previous testing step
+  ## for batch correction
+  ## (this only makes sense if testing was done)
+  ## 
+  ###########################################
 
-#if (correcting) {
   
   
   #----------------------------------------------------
@@ -250,7 +245,7 @@ stochprofIC.pipeline <- function(d,
     dplyr::mutate(gene = factor(gene),
            Variable = factor(Variable))
   
-# Columns have to be renamed again!  
+  # Columns have to be renamed again!  
   
   # Screening information: 
   # Proportion of genes kept after sidak correction and removing negative sigma estimates
@@ -262,7 +257,6 @@ stochprofIC.pipeline <- function(d,
   return(list(Coefficients = out.coefficients,
               `Corrected output` = out.corrected,
               `Genes with error` = unique(error.genes)))
-
-#}
 }
+
 

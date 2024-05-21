@@ -23,7 +23,7 @@ stochprofIC.pipeline(
   zeros.2nd = FALSE,
   zero.value.1st = NA,
   zero.value.2nd = 0,
-  return = "correcting&inferring"
+  ...
 )
 }
 \arguments{
@@ -61,7 +61,7 @@ stochprofIC.pipeline(
 
 \item{zero.value.2nd}{Numerical value with the substitute value for zero in expr, in the second GAMLSS.}
 
-\item{return}{Character string with either "screening", "testing" or "correcting&inferring". Defaults to "correcting&inferring".}
+\item{...}{Other options, mainly the details about what to return. Used internally for \code{\link{stochprofIC.screening()}} and \code{\link{stochprofIC.testing}}.}
 }
 \value{
 A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.

@@ -17,6 +17,7 @@
 #' @param re See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @param re.placement See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
 #' @param input.cleaned Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.
+#' @export
 #' @return Depending on the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
 stochprofIC.gamlss <- function(d,
                        expr,

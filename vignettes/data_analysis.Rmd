@@ -33,7 +33,7 @@ breast.cancer
 FOR testing
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
-screening.output <- stochprofIC.pipeline(
+screening.output <- stochprofIC.screening(
                 d = breast.cancer, # Working dataset
                 expr = "TPM", # Name of the column containing the expression variable
                 gene = "gene",  # Name of the column containing the gene variable
@@ -50,8 +50,7 @@ screening.output <- stochprofIC.pipeline(
                 zeros.2nd = FALSE, # Whether to change the value of zero in expr in the second gamlss call
                 zero.value.1st = NA, # Value to substitute the zero in expr in the first gamlss call
                 zero.value.2nd = 0, # Value to substitute the zero in expr in the second gamlss call
-                re.placement = "both", # Not yet implemented, refers to Random Effects
-                return="screening") # What does the function returns
+                re.placement = "both") # Not yet implemented, refers to Random Effects
 ```
 
 ```{r}
@@ -63,7 +62,7 @@ This is correctly returning the first part of the pipeline (screening).
 It returns the genes that pass Sidak correction, as well as the sigma type estimates ("Estimate") from gamlss.
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
-testing.output <- stochprofIC.pipeline(d = breast.cancer,
+testing.output <- stochprofIC.testing(d = breast.cancer,
                                        expr = "TPM",
                                        gene = "gene", 
                                        type = "type",
@@ -77,8 +76,7 @@ testing.output <- stochprofIC.pipeline(d = breast.cancer,
                                        trim.2nd = NA,
                                        zeros.1st = TRUE, zeros.2nd = FALSE,
                                        zero.value.1st = NA, zero.value.2nd = 0,
-                                       re.placement = "both",
-                                       return="testing")
+                                       re.placement = "both")
 ```
 
 ```{r}
@@ -104,8 +102,7 @@ correcting.inferring.output <- stochprofIC.pipeline(d = breast.cancer,
                                        trim.2nd = NA,
                                        zeros.1st = TRUE, zeros.2nd = FALSE,
                                        zero.value.1st = NA, zero.value.2nd = 0,
-                                       re.placement = "both",
-                                       return="correcting&inferring")
+                                       re.placement = "both")
 ```
 
 ```{r}
