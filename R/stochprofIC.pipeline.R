@@ -2,9 +2,9 @@
 #'
 #' Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and 
 #' transcripts per milion (TPM), run a pipeline based on a generalized additive model for 
-#' location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity 
+#' location, shape and scale (GAMLSS) to detect and parameterize transcriptional heterogeneity 
 #' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
-#' in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
+#' to obtain the corrected data. Two consecutive GAMLSS are performed:
 #' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, 
 #' and the second based on log expr+1 without trimming.
 #'
@@ -12,8 +12,8 @@
 #' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
 #' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
-#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.
-#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
+#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.
+#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
 #' @param log.1st Logical value indicating whether a log transformation should be performed in the first GAMLSS. Defaults to FALSE.
 #' @param log.2nd Logical value indicating whether a log transformation should be performed in the second GAMLSS. Defaults to TRUE.
 #' @param add1.1st Logical value indicating whether a unit should be added to expr (expr+1) in the first GAMLSS. Defaults to FALSE.

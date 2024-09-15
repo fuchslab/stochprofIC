@@ -1,10 +1,10 @@
 Package: stochprofIC
-Title: Run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data
-Version: 0.3.2
+Title: A pipeline for generalized additive modelling of transcriptional heterogeneity for 10-cell RNA sequencing data
+Version: 0.3.4
 Authors@R: 
     person("Mercè", "Garí", , "mercegari@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6903-0732"))
-Description: Development of a pipeline to detect/parameterize transcriptional heterogeneity of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, in order to obtain a the corrected data.
+Description: A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by normalizing for a set of covariates and adjusting for technical variation to obtain corrected data.
 Depends:
   R (>= 3.5),
   dplyr,
@@ -22,5 +22,5 @@ Suggests:
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr

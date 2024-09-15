@@ -3,11 +3,11 @@
 #' Internal function to facilitate the call to gamlss() using the necessary
 #' parts for stochprofIC.pipeline
 #'
-#' @param d Tidy data frame that has already been processed and that contains a single gene. If the data has not previously been arranged, the argument \code{input.cleaned} can be set to TRUE and then the input is arranged before the analysis.
+#' @param d Tidy data frame for a single gene that has already been processed. If the data have not previously been arranged, the argument \code{input.cleaned} should be set to TRUE so that the input is arranged before analysis.
 #' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
-#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.
-#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
+#' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.
+#' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
 #' @param return Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values
 #' @param log See \code{\link{stochprofIC.pipeline}}
 #' @param trim See \code{\link{stochprofIC.pipeline}}

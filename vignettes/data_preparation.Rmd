@@ -15,26 +15,26 @@ library(stochprofIC)
 library(tidyverse)
 ```
 
-This file contains two examples on how to transform the original data in csv into a tidy long format data suitable for the functions in the package.
+This file contains two examples on how to transform csv data into a tidy long format data suitable for the functions in the package.
 
 The only requirement for the package is to have a dataset with the following columns (in a tidy long format, where each row refers to a single observation):
 
 - One column must refer to the gene name.
 - One column must refer to the sample name.
-- One column must refer to the type of sample (control vs. real sample)
-- One column must refer to the TPM (transcripts per million) expression data.
-- At least one column should include a batch effect (generally sex, biopsy, tumor, time, etc.)
+- One column must refer to the type of sample (pool-and-split control vs. biological sample)
+- One column must refer to the RNA expression data in TPM (transcripts per million).
+- At least one column should include the covariate to be corrected for (generally sex, biopsy, tumor, time, etc.)
 
-There is no need for the dataset to have a specific column names, which can be arranged in the functions. However, in these examples, we provide the columns with the default names used in the pipeline function.
+The dataset does not need to have specific column names, which can be defined in the call of the functions. Examples provide columns with default names used in the function.
 
 
 ## Example 1: Glioma dataset
 
-Load original data for glioma.
+Load original data for glioma from GitHub (TODO list URL).
 
-Rename the variable "symbol" that contains the genes into "gene".
+Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
-Select only the "gene" variable and samples with RSEM data.
+Remove all other columns except for the "gene" variable and samples with RSEM data.
 
 ```{r}
 gl <- read.csv("data/glioma_minimal.csv") %>%
@@ -43,7 +43,7 @@ gl <- read.csv("data/glioma_minimal.csv") %>%
   dplyr::select(-c(ensgene, entrez, chr, start, end, strand, biotype, description))
 ```
 
-Load metadata for glioma with additional information (e.g. sex, time and type of sample).
+Load metadata for glioma with additional information about sex, time point and type of sample. Retain only the "dpi90" samples and controls from males and females.
 
 ```{r}
 meta.glioma <- read.csv("data/GSE147360-GPL19057_series_matrix.txt",
@@ -76,16 +76,11 @@ meta.glioma <- read.csv("data/GSE147360-GPL19057_series_matrix.txt",
   dplyr::select(-time)
 ```
 
-Create a tidy dataset in the long format using `pivot_longer()`.
-In the same pipe, do the following steps:
-
-- Create specific variables from sample names (e.g. sex, time and type of sample)
-- Remove observations containing mitochondrial (MT) genes and ERCCs
-- Normalize RSEM to TPM (for each sample, thus grouping by sample)
+Create a long format tidy dataset, create specific variables from sample names (e.g. sex, type of sample), remove observations containing mitochondrial (MT) genes and ERCCs, and normalize RSEM to TPM for each sample, grouped by sample.
 
 In addition, in order to be able to test the glioma data, only time 90 (dpi90) is selected.
 
-```{r}
+```{r, message=FALSE}
 glioma <- gl %>%
   pivot_longer(-gene, names_to = "id", values_to = "RSEM") %>%
   left_join(meta.glioma) %>%
@@ -99,23 +94,22 @@ glioma <- gl %>%
   group_by(sample) %>%
   mutate(TPM = (RSEM / sum(RSEM) * 1e6)) %>%
   ungroup() %>%
-  select(sample, gene, type, sex, RSEM, TPM)
+  dplyr::select(sample, gene, type, sex, TPM)
 ```
 
 The created object (glioma) is the same one that it is called using `data(glioma)`.
-
-```{r}
-glioma
-```
-
 The final format of this object contains the following elements: 
 
 - **sample**: Identifies the sample name.
 - **gene**: This variable should contain the name of the gene.
 - **type**: Identifies the type of sample.
 - **sex**: This variable indicates the batch from the sex of the mice.
-- **RSEM**: Original expression data (in this case, in RSEM). This is not needed for the analysis, but it is kept for comparison purposes (with the TPM expression data).
 - **TPM**: Transcripts per million expression data (TPM).
+
+
+```{r}
+glioma
+```
 
 Save the tidy dataset in the long format for subsequent steps.
 
@@ -128,11 +122,11 @@ Save the tidy dataset in the long format for subsequent steps.
 
 ### Original data
 
-Load original data for breast cancer.
+Load original data for breast cancer from GitHub (TODO list URL).
 
-Rename the variable "symbol" that contains the genes into "gene".
+Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
-Select only the "gene" variable and samples with RSEM data.
+Remove all other columns except for the "gene" variable and samples with RSEM data.
 
 ```{r}
 bc <- read.csv("data/breast_cancer_minimal.csv") %>%
@@ -142,12 +136,7 @@ bc <- read.csv("data/breast_cancer_minimal.csv") %>%
                    strand, biotype, description))
 ```
 
-Create a tidy dataset in the long format using `pivot_longer()`.
-In the same pipe, do the following steps:
-
-- Create specific variables from sample names (e.g. biopsy and type of sample)
-- Remove observations containing mitochondrial (MT) genes and ERCCs
-- Normalize RSEM to TPM (for each sample, thus grouping by sample)
+Create a long format tidy dataset, create specific variables from sample names (e.g. biopsy, type of sample), remove observations containing mitochondrial (MT) genes and ERCCs, and normalize RSEM to TPM for each sample grouped by sample.
 
 ```{r}
 breast.cancer <- bc %>%
@@ -164,23 +153,22 @@ breast.cancer <- bc %>%
   group_by(sample) %>%
   mutate(TPM = (RSEM / sum(RSEM) * 1e6)) %>%
   ungroup() %>%
-  select(sample, gene, type, biopsy, RSEM, TPM)
+  dplyr::select(sample, gene, type, biopsy, TPM)
 ```
 
 The created object (breast.cancer) is the same one that it is called using `data(breast.cancer)`.
-
-```{r}
-breast.cancer
-```
-
 The final format of this object contains the following elements: 
 
 - **sample**: Identifies the sample name.
 - **gene**: This variable should contain the name of the gene.
 - **type**: Identifies the type of sample.
 - **biopsy**: This variable indicates the batches from the five types of cancer.
-- **RSEM**: Original expression data (in this case, in RSEM). This is not needed for the analysis, but it is kept for comparison purposes (with the TPM expression data).
 - **TPM**: Transcripts per million expression data (TPM).
+
+
+```{r}
+breast.cancer
+```
 
 Save the tidy dataset in the long format for subsequent steps.
 

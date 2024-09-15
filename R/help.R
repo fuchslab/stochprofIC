@@ -1,6 +1,6 @@
 #' Tools facilitating a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.
 #'
-#' Development of a pipeline to detect/parameterize transcriptional heterogeneity of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, in order to obtain a the corrected data.
+#' A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by normalizing for a set of covariates and adjusting for technical variation to obtain corrected data.
 #'
 #' @encoding UTF-8
 #' @references \url{http://mercegari.net/}.
@@ -13,5 +13,6 @@
 #' @importFrom utils capture.output
 #' @importFrom tidyselect all_of
 #' @docType package
-#' @name pipeline
+#' @name stochprofIC
+#' @aliases stochprofIC
 NULL
