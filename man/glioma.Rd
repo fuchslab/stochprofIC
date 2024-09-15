@@ -3,35 +3,18 @@
 \docType{data}
 \name{glioma}
 \alias{glioma}
-\title{Glioma: a dataset on  XX}
+\title{Glioma: a dataset on gene expression (in TPM) with 10-cell samples and pool-and-split controls from two sexes that can be used as input data for the stochprofIC.pipeline()}
 \format{
-A data frame containing X suitable for being used in the pipeline.
+A data frame containing TPM observations for 50 genes for samples and controls and sex as a covariate.
 }
 \usage{
 data(glioma)
 }
 \description{
-A dataset on X contining observations on X, ready for being used in the pipeline
+A dataset on gene expression containing observations for 50 genes on samples and controls from two sexes.
 }
 \examples{
 data(glioma)
 str(glioma)
-\dontrun{
-stochprofIC.pipeline(d = glioma,
-              expr = "TPM",
-              type = "type",
-              covariates = "sex",
-              gene = "gene", 
-              re = NA,
-              log.1st = FALSE, 
-              log.2nd = TRUE,
-              add1.1st = FALSE, 
-              add1.2nd = TRUE,
-              trim.1st = 3, 
-              trim.2nd = NA,
-              zeros.1st = TRUE, zeros.2nd = FALSE,
-              zero.value.1st = NA, zero.value.2nd = 0,
-              re.placement = "both")
-}
 }
 \keyword{datasets}

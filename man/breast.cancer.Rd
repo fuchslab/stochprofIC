@@ -3,37 +3,18 @@
 \docType{data}
 \name{breast.cancer}
 \alias{breast.cancer}
-\title{Breast cancer: a dataset on 10cRNA-seq analysis consisting on an identical algorithm applied separately to 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors.}
+\title{Breast cancer: a dataset on gene expression (in TPM) with 10-cell samples and pool-and-split controls from five biopsies that can be used as input data for the stochprofIC.pipeline()}
 \format{
-A data frame containing 10cRNA-seq from a subset of 50 genes, with information on 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors each, suitable for being used in the Inferring&Correcting pipeline.
+A data frame containing TPM observations for 50 genes in samples and controls, and biopsy identifier as a covariate.
 }
 \usage{
 data(breast.cancer)
 }
 \description{
-A dataset on 10cRNA-seq contining observations on 50 genes, with 28 10-cell samples and 20 pool-and-split controls from five UVABC tumors each, ready for being used in the Inferring&Correcting pipeline. The original dataset, based on Singh et al., 2021 (DOI: https://doi.org/10.1158/0008-5472.CAN-20-1034) can be found in the following 
-
+A dataset on gene expression containing observations for 50 genes on samples and controls from five biopsies.
 }
 \examples{
 data(breast.cancer)
 str(breast.cancer)
-\dontrun{
-stochprofIC.pipeline(d = breast.cancer,
-               expr = "TPM",
-               gene = "gene", 
-               type = "type",
-               covariates = "biopsy",
-               re = NA,   # not implemented yet
-               log.1st = FALSE, 
-               log.2nd = TRUE,
-               add1.1st = FALSE, 
-               add1.2nd = TRUE,
-               trim.1st = 3, 
-               trim.2nd = NA,
-               zeros.1st = TRUE, zeros.2nd = FALSE,
-               zero.value.1st = NA, zero.value.2nd = 0,
-               re.placement = "both",
-               return="screening")
-}
 }
 \keyword{datasets}

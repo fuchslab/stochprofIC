@@ -7,19 +7,19 @@
 \method{arrange}{input}(d, expr, gene, type, covariates = NULL)
 }
 \arguments{
-\item{d}{Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.}
+\item{d}{Tidy data frame containing information about 10-cell measurements. Each row corresponds to one measurement of one transcript. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.}
 
 \item{expr}{Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.}
 
 \item{gene}{Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.}
 
-\item{type}{Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.}
+\item{type}{Name (character string) of the column in \code{d} that contains the information whether the observation is from a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.}
 
-\item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
+\item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
 }
 \value{
 A tidy dataset with the data arranged, cleaned and ready for the analysis.
 }
 \description{
-Internal function to arrange the raw input and arrange it into known variable names, ready for the analysis.
+Internal function to arrange the raw input into known variable names for the analysis.
 }

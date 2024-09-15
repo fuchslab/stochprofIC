@@ -2,13 +2,12 @@
 % Please edit documentation in R/help.R
 \docType{package}
 \encoding{UTF-8}
-\name{pipeline}
-\alias{stochprofIC}
+\name{stochprofIC}
 \alias{stochprofIC-package}
-\alias{pipeline}
+\alias{stochprofIC}
 \title{Tools facilitating a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.}
 \description{
-Development of a pipeline to detect/parameterize transcriptional heterogeneity of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, in order to obtain a the corrected data.
+A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by normalizing for a set of covariates and adjusting for technical variation to obtain corrected data.
 }
 \references{
 \url{http://mercegari.net/}.

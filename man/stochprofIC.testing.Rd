@@ -5,38 +5,41 @@
 \alias{stochprofIC.testing}
 \title{Run the testing phase}
 \usage{
-stochprofIC.testing(...)
+stochprofIC.testing(
+  d,
+  expr,
+  gene,
+  type,
+  covariates,
+  log,
+  add1,
+  trim,
+  zeros,
+  zero.value,
+  re = NA,
+  re.placement = "both"
+)
 }
 \arguments{
-\item{d}{Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.}
+\item{d}{Tidy data frame containing information about 10-cell measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.}
 
 \item{expr}{Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.}
 
 \item{gene}{Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.}
 
-\item{type}{Name (character string) of the column in \code{d} that contains the information whether the observation is from stochastic profiling (small-pool) samples or pool-and-split controls. This column is expected to contain factor values with exactly two levels: the pool-and-split controls and the small-pool samples.}
+\item{type}{Name (character string) of the column in \code{d} that contains the information whether the observation is from a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.}
 
-\item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside of \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
+\item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
 
-\item{log.1st}{Logical value indicating whether a log transformation should be performed in the first GAMLSS. Defaults to FALSE.}
+\item{log}{Logical value indicating whether a log transformation should be performed in the testing GAMLSS. Defaults to TRUE.}
 
-\item{log.2nd}{Logical value indicating whether a log transformation should be performed in the second GAMLSS. Defaults to TRUE.}
+\item{add1}{Logical value indicating whether a unit should be added to expr (expr+1) in the testing GAMLSS. Defaults to TRUE.}
 
-\item{add1.1st}{Logical value indicating whether a unit should be added to expr (expr+1) in the first GAMLSS. Defaults to FALSE.}
+\item{trim}{Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed. Defaults to NA in the testing GAMLSS.}
 
-\item{add1.2nd}{Logical value indicating whether a unit should be added to expr (expr+1) in the second GAMLSS. Defaults to TRUE.}
+\item{zeros}{Logical value indicating whether to change the value of zero in expr, in the testing GAMLSS.}
 
-\item{trim.1st}{Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed. Defaults to 3 in the first GAMLSS.}
-
-\item{trim.2nd}{Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed. Defaults to NA in the second GAMLSS.}
-
-\item{zeros.1st}{Logical value indicating whether to change the value of zero in expr, in the first GAMLSS.}
-
-\item{zeros.2nd}{Logical value indicating whether to change the value of zero in expr, in the second GAMLSS.}
-
-\item{zero.value.1st}{Numerical value with the substitute value for zero in expr, in the first GAMLSS.}
-
-\item{zero.value.2nd}{Numerical value with the substitute value for zero in expr, in the second GAMLSS.}
+\item{zero.value}{Numerical value with the substitute value for zero in expr, in the testing GAMLSS.}
 
 \item{re}{Character string with the name of the variable that carries random effects. Not yet implemented.}
 
@@ -47,12 +50,12 @@ A tibble with the testing values
 }
 \description{
 Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and
-transcripts per milion (TPM), run a pipeline based on a generalized additive model for
-location, shape and scale (GAMLSS) to detect/parameterize transcriptional heterogeneity
+transcripts per milion (TPM), test a generalized additive model for
+location, shape and scale (GAMLSS) to detect and parameterize transcriptional heterogeneity
 of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
-in order to obtain a data frame with the corrected data. Two consecutive GAMLSS are performed:
-the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs,
-and the second based on log expr+1 without trimming.
+to obtain a data frame of tested genes. Two consecutive GAMLSS are performed:
+the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs (the same as \code{stochprofIC.screening()}),
+and the second based on log expr+1 without trimming. With this testing phase, a GAMLSS estimation is ready to identify possible batch effects.
 }
 \examples{
 \dontrun{
