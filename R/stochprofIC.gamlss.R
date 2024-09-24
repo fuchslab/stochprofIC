@@ -1,24 +1,24 @@
-#' Run a gamlss() call in a specific way suitable for stochprofIC.pipeline
+#' Run a customized gamlss() call for stochprofIC.pipeline
 #'
-#' Internal function to facilitate the call to gamlss() using the necessary
+#' Internal function to implement gamlss() using the necessary
 #' parts for stochprofIC.pipeline
 #'
-#' @param d Tidy data frame for a single gene that has already been processed. If the data have not previously been arranged, the argument \code{input.cleaned} should be set to TRUE so that the input is arranged before analysis.
+#' @param d Tidy data frame for a single gene that has already been processed. If the data have not previously been arranged, the argument \code{is.input.cleaned} should be set to FALSE so that the input is arranged before analysis.
 #' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
 #' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.
 #' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
-#' @param return Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values
-#' @param log See \code{\link{stochprofIC.pipeline}}
-#' @param trim See \code{\link{stochprofIC.pipeline}}
-#' @param zeros See \code{\link{stochprofIC.pipeline}}
-#' @param zero.value See \code{\link{stochprofIC.pipeline}}
-#' @param add.1 See \code{\link{stochprofIC.pipeline}}
-#' @param re See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
-#' @param re.placement See \code{\link{stochprofIC.pipeline}}. Not yet implemented.
-#' @param input.cleaned Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.
+#' @param return Character vector specifying the output: "simple" returns and "complete" appends the corrected values.
+#' @param log Logical value indicating whether a log transformation should be performed.
+#' @param trim Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed.
+#' @param zeros Logical value indicating whether to change the value of zero in expr.
+#' @param zero.value Numerical value with the substitute value for zero in expr.
+#' @param add.1 Logical value indicating whether a unit should be added to expr (expr+1).
+#' @param re Character string with the name of the variable that carries random effects. Not yet implemented.
+#' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
+#' @param is.input.cleaned Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.
 #' @export
-#' @return Depending on the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
+#' @return A tibble of parameter estimates (if "return" = "simple") or a tibble of parameter estimates and a second tibble of corrected values (if "return" = "full").
 stochprofIC.gamlss <- function(d,
                        expr,
                        gene, 
@@ -28,9 +28,9 @@ stochprofIC.gamlss <- function(d,
                        log = TRUE, trim = NA, 
                        zeros = FALSE, zero.value = 0, add.1 = TRUE,
                        re = NA, re.placement = "both",
-                       input.cleaned = FALSE) {
+                       is.input.cleaned = FALSE) {
   
-  if (!input.cleaned) {
+  if (!is.input.cleaned) {
     d <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   }
   gene.now <- unique(d$gene)

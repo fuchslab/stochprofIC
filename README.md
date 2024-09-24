@@ -1,6 +1,6 @@
 # stochprofIC
 
-stochprofIC is a tool to run a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.
+stochprofIC is a tool to run a pipeline based on a generalized additive model to detect and parameterize transcriptional heterogeneity of 10-cell data.
 
 Creator:
 

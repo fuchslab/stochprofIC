@@ -1,4 +1,4 @@
-#' Run the testing phase
+#' Run the testing phase of stochprofIC
 #'
 #' Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and 
 #' transcripts per milion (TPM), test a generalized additive model for 

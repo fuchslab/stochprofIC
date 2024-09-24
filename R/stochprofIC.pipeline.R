@@ -1,15 +1,15 @@
-#' Run the whole pipeline
+#' Run the entire stochprofIC pipeline
 #'
 #' Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and 
 #' transcripts per milion (TPM), run a pipeline based on a generalized additive model for 
 #' location, shape and scale (GAMLSS) to detect and parameterize transcriptional heterogeneity 
-#' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation,
-#' to obtain the corrected data. Two consecutive GAMLSS are performed:
-#' the first based on gene expression (expr) that is non-log, trimmed and zeroes converted to NAs, 
-#' and the second based on log expr+1 without trimming.
+#' of 10-cell data, accounting for a set of covariates and adjusting for technical variation
+#' to obtain corrected data. Two consecutive GAMLSSs are performed:
+#' the first GAMLSS based on gene expression (expr) that is not log-transformed but trimmed and zeros converted to NAs, 
+#' and the second GAMLSS based on log-transformed (expr+1) without trimming or conversion of zeros to NAs.
 #'
 #' @encoding UTF-8
-#' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.
+#' @param d Tidy data frame containing information about small-pool measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be accounting for.
 #' @param expr Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
 #' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.
@@ -28,7 +28,7 @@
 #' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
 #' @param ... Other options, mainly the details about what to return. Used internally for \code{\link{stochprofIC.screening()}} and \code{\link{stochprofIC.testing}}.
 #' @export
-#' @return A list with two elements: "Coefficients" with a tibble containing gene, Variable, Part (either location "Mu" or shape "Sigma"), and Estimate; and "Corrected output" with a tibble containing gene and the non-corrected and corrected values.
+#' @return A list with two elements: "Coefficients" with a tibble containing gene, covariate(s), either location "Mu" or shape "Sigma", and Estimate; and "Corrected output" with a tibble containing gene along with the non-corrected and corrected values.
 #' @examples
 #'\dontrun{
 #'data(glioma)
@@ -94,7 +94,7 @@ stochprofIC.pipeline <- function(d,
                              trim = trim.1st, 
                              zeros = zeros.1st, 
                              zero.value = zero.value.1st,
-                             input.cleaned = TRUE)
+                             is.input.cleaned = TRUE)
     if (is.null(go)) {
       error.genes <- c(error.genes, gene.now)
     } else {
@@ -159,7 +159,7 @@ stochprofIC.pipeline <- function(d,
                        zeros = zeros.2nd, 
                        zero.value = zero.value.2nd,
                        return = "simple",
-                       input.cleaned = TRUE)
+                       is.input.cleaned = TRUE)
     if (is.null(go)) {
       error.genes <- c(error.genes, gene.now)
     } else {
@@ -225,7 +225,7 @@ stochprofIC.pipeline <- function(d,
                            trim = trim.2nd, 
                            zeros = zeros.2nd, 
                            zero.value = zero.value.2nd,
-                           input.cleaned = TRUE)
+                           is.input.cleaned = TRUE)
 
     if (is.null(out.full)) {
       error.genes <- c(error.genes, levels(d.post.fdr$gene)[g])
