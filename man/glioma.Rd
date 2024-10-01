@@ -5,7 +5,7 @@
 \alias{glioma}
 \title{Glioma: a dataset on gene expression (in TPM) with 10-cell samples and pool-and-split controls from two sexes that can be used as input data for the stochprofIC.pipeline()}
 \format{
-A data frame containing TPM observations for 50 genes for samples and controls and sex as a covariate.
+A data frame containing TPM observations for samples and controls of 50 genes with sex as a covariate.
 }
 \usage{
 data(glioma)

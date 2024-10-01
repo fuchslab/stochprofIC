@@ -3,7 +3,7 @@
 \encoding{UTF-8}
 \name{stochprofIC.testing}
 \alias{stochprofIC.testing}
-\title{Run the testing phase}
+\title{Run the testing phase of stochprofIC}
 \usage{
 stochprofIC.testing(
   d,

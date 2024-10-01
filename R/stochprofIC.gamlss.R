@@ -8,7 +8,7 @@
 #' @param gene Name (character string) of the column in \code{d} that contains the names of the genes. This column is expected to contain factor values.
 #' @param type Name (character string) of the column in \code{d} that contains the information whether the observation is from a 10-cell biological sample or a 10-cell pool-and-split control. This column is expected to contain factor values with exactly two levels: 1) sample, 2) control.
 #' @param covariates Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.
-#' @param return Character vector specifying the output: "simple" returns and "complete" appends the corrected values.
+#' @param return Character vector specifying the output: "simple" returns and "complete" appends the corrected values.
 #' @param log Logical value indicating whether a log transformation should be performed.
 #' @param trim Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed.
 #' @param zeros Logical value indicating whether to change the value of zero in expr.

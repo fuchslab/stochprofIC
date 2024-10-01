@@ -22,7 +22,7 @@ NULL
 #' @docType data
 #' @keywords datasets
 #' @usage data(glioma)
-#' @format A data frame containing TPM observations for 50 genes for samples and controls and sex as a covariate.
+#' @format A data frame containing TPM observations for samples and controls of 50 genes with sex as a covariate.
 #' @examples
 #' data(glioma)
 #' str(glioma)

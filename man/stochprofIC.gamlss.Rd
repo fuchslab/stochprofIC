@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochprofIC.gamlss.R
 \name{stochprofIC.gamlss}
 \alias{stochprofIC.gamlss}
-\title{Run a gamlss() call in a specific way suitable for stochprofIC.pipeline}
+\title{Run a customized gamlss() call for stochprofIC.pipeline}
 \usage{
 stochprofIC.gamlss(
   d,
@@ -18,11 +18,11 @@ stochprofIC.gamlss(
   add.1 = TRUE,
   re = NA,
   re.placement = "both",
-  input.cleaned = FALSE
+  is.input.cleaned = FALSE
 )
 }
 \arguments{
-\item{d}{Tidy data frame for a single gene that has already been processed. If the data have not previously been arranged, the argument \code{input.cleaned} should be set to TRUE so that the input is arranged before analysis.}
+\item{d}{Tidy data frame for a single gene that has already been processed. If the data have not previously been arranged, the argument \code{is.input.cleaned} should be set to FALSE so that the input is arranged before analysis.}
 
 \item{expr}{Name (character string) of the column in \code{d} that contains the measurements of gene expression; e.g. as transcripts per million (TPM). This column is expected to contain double values.}
 
@@ -32,28 +32,28 @@ stochprofIC.gamlss(
 
 \item{covariates}{Names (vector of character strings) of the columns in \code{d} that contain further information to be adjusted for, aside from \code{type}. These columns are expected to contain factor values such as sex, biopsy, time, etc.}
 
-\item{return}{Character vector describing the type of output wanted: either "simple" to get the parameter estimates or "complete" to also include the corrected values}
+\item{return}{Character vector specifying the output: "simple" returns and "complete" appends the corrected values.}
 
-\item{log}{See \code{\link{stochprofIC.pipeline}}}
+\item{log}{Logical value indicating whether a log transformation should be performed.}
 
-\item{trim}{See \code{\link{stochprofIC.pipeline}}}
+\item{trim}{Numerical value indicating the number of values to be trimmed, depending on each status of technical variation and covariates. When NA, no trimming is performed.}
 
-\item{zeros}{See \code{\link{stochprofIC.pipeline}}}
+\item{zeros}{Logical value indicating whether to change the value of zero in expr.}
 
-\item{zero.value}{See \code{\link{stochprofIC.pipeline}}}
+\item{zero.value}{Numerical value with the substitute value for zero in expr.}
 
-\item{add.1}{See \code{\link{stochprofIC.pipeline}}}
+\item{add.1}{Logical value indicating whether a unit should be added to expr (expr+1).}
 
-\item{re}{See \code{\link{stochprofIC.pipeline}}. Not yet implemented.}
+\item{re}{Character string with the name of the variable that carries random effects. Not yet implemented.}
 
-\item{re.placement}{See \code{\link{stochprofIC.pipeline}}. Not yet implemented.}
+\item{re.placement}{Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.}
 
-\item{input.cleaned}{Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.}
+\item{is.input.cleaned}{Logical Whether the input is already cleaned (when used within \code{\link{stochprofIC.pipeline}}). Defaults to FALSE, when the data is cleaned within.}
 }
 \value{
-Depending on the parameter "return", the output can be a tibble of parameter estimates ("simple") or also another tibble with the corrected values ("full").
+A tibble of parameter estimates (if "return" = "simple") or a tibble of parameter estimates and a second tibble of corrected values (if "return" = "full").
 }
 \description{
-Internal function to facilitate the call to gamlss() using the necessary
+Internal function to implement gamlss() using the necessary
 parts for stochprofIC.pipeline
 }

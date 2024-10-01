@@ -5,9 +5,9 @@
 \name{stochprofIC}
 \alias{stochprofIC-package}
 \alias{stochprofIC}
-\title{Tools facilitating a pipeline based on a generalized additive model to detect/parameterize transcriptional heterogeneity of 10-cell data.}
+\title{Tools facilitating a pipeline based on a generalized additive model to detect and parameterize transcriptional heterogeneity of 10-cell data.}
 \description{
-A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by normalizing for a set of covariates and adjusting for technical variation to obtain corrected data.
+A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by accounting for a set of covariates and adjusting for technical variation to obtain corrected data.
 }
 \references{
 \url{http://mercegari.net/}.

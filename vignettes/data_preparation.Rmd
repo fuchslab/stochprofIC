@@ -10,7 +10,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r echo = FALSE, message = FALSE, warning = FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(stochprofIC)
 library(tidyverse)
 ```
@@ -23,21 +23,21 @@ The only requirement for the package is to have a dataset with the following col
 - One column must refer to the sample name.
 - One column must refer to the type of sample (pool-and-split control vs. biological sample)
 - One column must refer to the RNA expression data in TPM (transcripts per million).
-- At least one column should include the covariate to be corrected for (generally sex, biopsy, tumor, time, etc.)
+- At least one column should include the covariate to be corrected for (such as sex, biopsy, tumor, time, etc.)
 
 The dataset does not need to have specific column names, which can be defined in the call of the functions. Examples provide columns with default names used in the function.
 
 
 ## Example 1: Glioma dataset
 
-Load original data for glioma from GitHub (TODO list URL).
+Load original data for glioma from NCBI (\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147360}).
 
 Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
 Remove all other columns except for the "gene" variable and samples with RSEM data.
 
 ```{r}
-gl <- read.csv("data/glioma_minimal.csv") %>%
+gl <- data.table::fread("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE147360&format=file&file=GSE147360%5F2020%5F03%5F20%5Fopc%5Fallcompiled%2Ecsv%2Egz") %>%
   rename(gene = symbol) %>%
   mutate(gene = as.factor(gene)) %>%
   dplyr::select(-c(ensgene, entrez, chr, start, end, strand, biotype, description))
@@ -78,11 +78,12 @@ meta.glioma <- read.csv("data/GSE147360-GPL19057_series_matrix.txt",
 
 Create a long format tidy dataset, create specific variables from sample names (e.g. sex, type of sample), remove observations containing mitochondrial (MT) genes and ERCCs, and normalize RSEM to TPM for each sample, grouped by sample.
 
-In addition, in order to be able to test the glioma data, only time 90 (dpi90) is selected.
+In addition, select only the 90-day time point (dpi90) for analysis.
 
 ```{r, message=FALSE}
 glioma <- gl %>%
   pivot_longer(-gene, names_to = "id", values_to = "RSEM") %>%
+  mutate(id = str_replace(id, "-", ".")) %>%
   left_join(meta.glioma) %>%
   filter(!is.na(sample)) %>%
   dplyr::select(sample, gene, type, sex, RSEM) %>%
@@ -103,8 +104,8 @@ The final format of this object contains the following elements:
 - **sample**: Identifies the sample name.
 - **gene**: This variable should contain the name of the gene.
 - **type**: Identifies the type of sample.
-- **sex**: This variable indicates the batch from the sex of the mice.
-- **TPM**: Transcripts per million expression data (TPM).
+- **sex**: This variable indicates the sex of the mice for adjustment.
+- **TPM**: Transcripts per million (TPM) expression data.
 
 
 ```{r}
@@ -122,14 +123,14 @@ Save the tidy dataset in the long format for subsequent steps.
 
 ### Original data
 
-Load original data for breast cancer from GitHub (TODO list URL).
+Load original data for breast cancer from NCBI (\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147356}).
 
 Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
 Remove all other columns except for the "gene" variable and samples with RSEM data.
 
 ```{r}
-bc <- read.csv("data/breast_cancer_minimal.csv") %>%
+bc <- data.table::fread("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE147356&format=file&file=GSE147356%5F2020%5F02%5F06%5Fbreastcancer%5Fallcompiled%2Ecsv%2Egz") %>%
   rename(gene = symbol) %>%
   mutate(gene = as.factor(gene)) %>%
   dplyr::select(-c(ensgene, entrez, chr, start, end, 
@@ -163,7 +164,7 @@ The final format of this object contains the following elements:
 - **gene**: This variable should contain the name of the gene.
 - **type**: Identifies the type of sample.
 - **biopsy**: This variable indicates the batches from the five types of cancer.
-- **TPM**: Transcripts per million expression data (TPM).
+- **TPM**: Transcripts per million (TPM) expression data.
 
 
 ```{r}

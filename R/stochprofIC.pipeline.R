@@ -26,7 +26,8 @@
 #' @param zero.value.2nd Numerical value with the substitute value for zero in expr, in the second GAMLSS.
 #' @param re Character string with the name of the variable that carries random effects. Not yet implemented.
 #' @param re.placement Character string with either "location", "shape" or "both" as to whether the random effects in \code{re} are estimated for each of the components, or for both of them. Not yet implemented.
-#' @param ... Other options, mainly the details about what to return. Used internally for \code{\link{stochprofIC.screening()}} and \code{\link{stochprofIC.testing}}.
+#' @param return Character vector indication what to return with the funcion. Default is "Correcting&Inferring".
+#' @param ... Other options, mainly the details about what to return. Used internally for \code{\link{stochprofIC.screening}} and \code{\link{stochprofIC.testing}}.
 #' @export
 #' @return A list with two elements: "Coefficients" with a tibble containing gene, covariate(s), either location "Mu" or shape "Sigma", and Estimate; and "Corrected output" with a tibble containing gene along with the non-corrected and corrected values.
 #' @examples
@@ -45,7 +46,8 @@ stochprofIC.pipeline <- function(d,
                             trim.1st = 3, trim.2nd = NA,
                             zeros.1st = TRUE, zeros.2nd = FALSE,
                             zero.value.1st = NA, zero.value.2nd = 0,
-                            return = "Correcting&Inferring") {
+                            return = "Correcting&Inferring",
+			    ...) {
 
   D <- arrange.input(d = d, expr = expr, gene = gene, type = type, covariates = covariates)
   N.total.genes <- length(unique(D$gene))

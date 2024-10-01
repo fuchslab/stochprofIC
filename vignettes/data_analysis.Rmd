@@ -53,7 +53,7 @@ screening.output
 
 This is correctly returning the first part of the pipeline (screening).
 
-It returns the genes that pass Sidak correction, as well as the sigma type estimates ("Estimate") from gamlss.
+It returns the genes that pass Sidak correction, as well as the sigma type estimates ("Estimate") from GAMLSS. It also returns a list with gene names that did not converge.
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 testing.output <- stochprofIC.testing(d = breast.cancer, # Working dataset
@@ -76,7 +76,7 @@ testing.output
 
 This is correctly returning the second part of the pipeline (testing).
 
-It returns the genes that passes False Discovery Rate (FDR), as well as the sigma type estimates from gamlss.
+It returns the genes that passes False Discovery Rate (FDR), as well as the sigma type estimates from GAMLSS.
 
 ```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
 correcting.inferring.output <- stochprofIC.pipeline(d = breast.cancer,
@@ -103,9 +103,10 @@ correcting.inferring.output
 This is correctly returning the last part of the pipeline (correcting&inferring).
 
 It returns a list with three objects:
-- All the gamlss estimates from the final selected genes ('Coefficients')
-- The corrected output data together with the non-corrected (TPM), for comparison ('Corrected output'). This output can be used for forthcoming analyses (e.g. stochprofML).
-- A list of genes with errors, meaning that no gamlss model has been computed due to unknown issues.
+
+- All the GAMLSS estimates from the final selected genes ('Coefficients')
+- The corrected output data together with the non-corrected (TPM), for comparison ('Corrected output'). This output can be used for subsequent analyses (e.g. stochprofML).
+- A list of genes with errors, meaning that no GAMLSS output is provided due to non-conversion of the model.
 
 ```{r}
 correcting.inferring.output$`Corrected output`

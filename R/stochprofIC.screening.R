@@ -3,7 +3,7 @@
 #' Given a tidy data frame with variables identifying the sample, gene, type, covariate(s) and 
 #' transcripts per milion (TPM), run a screening procedure based on a generalized additive model for 
 #' location, shape and scale (GAMLSS) to detect and parameterize transcriptional heterogeneity 
-#' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, to obtain a data frame of genes that passed the screening for robust dispersion. Those are genes with larger biological variation than controls in that the p-values of the sigma coefficient for biological variation (sigma.type) is ≤0.05 after Sidak correction. The GAMLSS is performed based on gene expression (expr) that is not log-transformed but trimmed and remaining zeros converted to NAs. 
+#' of 10-cell data, normalizing for a set of covariates and adjusting for technical variation, to obtain a data frame of genes that passed the screening for robust dispersion. Those are genes with larger biological variation than controls in that the p-values of the sigma coefficient for biological variation (sigma.type) is <=0.05 after Sidak correction. The GAMLSS is performed based on gene expression (expr) that is not log-transformed but trimmed and remaining zeros converted to NAs. 
 #'
 #' @encoding UTF-8
 #' @param d Tidy data frame containing information about 10-cell measurements. Each row corresponds to one measurement. Columns contain measured gene expression (\code{expr}), gene names (\code{gene}), measurement type (\code{type}) and covariate information to be adjusted for.

@@ -12,7 +12,7 @@
 #' @importFrom stats formula model.matrix p.adjust
 #' @importFrom utils capture.output
 #' @importFrom tidyselect all_of
-#' @docType package
 #' @name stochprofIC
+"_PACKAGE"
 #' @aliases stochprofIC
 NULL
