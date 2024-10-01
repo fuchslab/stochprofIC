@@ -30,7 +30,7 @@ The dataset does not need to have specific column names, which can be defined in
 
 ## Example 1: Glioma dataset
 
-Load original data for glioma from NCBI (\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147360}).
+Load original data for glioma from NCBI (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147360).
 
 Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
@@ -123,7 +123,7 @@ Save the tidy dataset in the long format for subsequent steps.
 
 ### Original data
 
-Load original data for breast cancer from NCBI (\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147356}).
+Load original data for breast cancer from NCBI (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147356).
 
 Rename the variable "symbol" that contains the genes into "gene" for clarity.
 
