@@ -122,7 +122,8 @@ stochprofIC.pipeline <- function(d,
   if(return == "screening"){
     # Proportion of genes kept after sidak correction and removing negative sigma estimates
     message(paste("Proportion of genes kept after sidak correction\nand removing negative sigma estimates:", (dim(out.screening1)[1] / N.total.genes)*100, "%"))
-    return(list(Screening = out.screening1, 
+    return(list(Unscreened = out.sidak,
+                Screening = out.screening1, 
                 `Genes with error` = unique(error.genes)))
   }
 
@@ -176,19 +177,20 @@ stochprofIC.pipeline <- function(d,
   
   # Manual test for extracting bonferroni p-values (FDR)
   out.fdr <- out.gamlss2 %>%
-    dplyr::mutate(Pval.dfr = stats::p.adjust(Pval, method="fdr")) 
+    dplyr::mutate(Pval.fdr = stats::p.adjust(Pval, method="fdr")) 
   
   out.screening2 <- out.gamlss2 %>%
     dplyr::mutate(Pval.fdr = stats::p.adjust(Pval, method="fdr")) %>%
     dplyr::filter(Estimate >= 0) %>%
-    dplyr::filter(Pval.fdr <= 0.05)
+    dplyr::filter(Pval.fdr <= 0.15)
   
   
   
   if(return == "testing"){
     # Proportion of genes kept after FDR correction and removing negative sigma estimates
     message(paste("Proportion of genes kept after FDR correction\nand removing negative sigma estimates:", (dim(out.screening2)[1] / N.total.genes)*100, "%"))
-    return(list(Testing = out.screening2, 
+    return(list(Unscreened = out.fdr,
+                Testing = out.screening2, 
                 `Genes with error` = unique(error.genes)))
   }
   

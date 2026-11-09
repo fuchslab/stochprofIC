@@ -82,7 +82,7 @@ stochprofIC.gamlss <- function(d,
   # Estimation of the GAMLSS
   capture.output({m <- try(suppressWarnings(gamlss::gamlss(formula = model.equation.mu, 
                           sigma.formula = model.equation.sigma, 
-                          data = d, family = gamlss.dist::NO, 
+                          data = d, family = gamlss.dist::NO2, 
                           control = gamlss::gamlss.control(trace=FALSE)))) }, file = nullfile())
   
   if(return == "simple") {
@@ -114,8 +114,12 @@ stochprofIC.gamlss <- function(d,
       out <- sm %>%
         base::as.data.frame() %>% 
         dplyr::mutate(Variable = keep.rownames) %>% 
-        dplyr::mutate(Part = gl(2,(dplyr::n()/2), labels = c("Mu", "Sigma"))) %>%
-        dplyr::select(Variable, Part, Estimate) #%>%
+        dplyr::mutate(Part = gl(2,(dplyr::n()/2), labels = c("Mu", "Variance"))) %>%
+        #mutate(Estimate_lowerCI = rbind(confint(m, what = 'mu'),
+        #                                confint(m, what = 'sigma'))[,1],
+        #       Estimate_upperCI = rbind(confint(m, what = 'mu'),
+        #                                confint(m, what = 'sigma'))[,2]) %>%
+        dplyr::select(Variable, Part, Estimate,) #%>%
         #dplyr::filter(!grepl('Intercept', Variable))
       rownames(out) <- NULL
       mu.vector <- out %>%
@@ -124,7 +128,7 @@ stochprofIC.gamlss <- function(d,
         tibble::column_to_rownames("Variable") %>%
         as.matrix()
       sigma.vector <- out %>%
-        dplyr::filter(Part == "Sigma") %>%
+        dplyr::filter(Part == "Variance") %>%
         dplyr::select(Variable, Estimate) %>%
         dplyr::mutate(Estimate = ifelse(Variable == "type", 0, Estimate)) %>%
         tibble::column_to_rownames("Variable") %>%
@@ -149,13 +153,13 @@ stochprofIC.gamlss <- function(d,
       
       # d contains id, gene, expr, and then the type and the remaining covariates
       # Therefore the matrix multiplication must reflect that
-      mu.part <- mu.vector[1] + (as.matrix(d[,-c(1,2,3)])%*% mu.vector[-1])
-      sigma.part <- sigma.vector[1] + (as.matrix(d[,-c(1,2,3)]) %*% sigma.vector[-1])
-      correction <- exp(((d$expr - mu.part) / exp(sigma.part)))[,1]
+      mu.part <- mu.vector[1] + (as.matrix(d[,colnames(d) %in% rownames(mu.vector)]) %*% mu.vector[-1])
+      sigma.part <- sigma.vector[1] + (as.matrix(d[,colnames(d) %in% rownames(sigma.vector)]) %*% sigma.vector[-1])
+      correction <- exp(((d$expr - mu.part) / sqrt(exp(sigma.part))))[,1]
 
       # Remove intercepts from the return
-      out <- out %>% 
-        dplyr::filter(!grepl('Intercept', Variable))
+      #out <- out %>% 
+      #  dplyr::filter(!grepl('Intercept', Variable))
       
       return(list(coefficients = out, exprs = tibble::tibble(`Non-corrected` = d$expr[d$type == 1],
                                                             Corrected = correction[d$type == 1])))
