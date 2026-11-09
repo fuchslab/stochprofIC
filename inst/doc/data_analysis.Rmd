@@ -1,0 +1,131 @@
+---
+title: "stochprofIC: Example on data analysis"
+author: "Mercè Garí"
+date: "`r format(Sys.time(), '%d/%m/%Y')` - Version `r packageVersion('stochprofIC')`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{stochprofIC: Example on data analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+library(stochprofIC)
+```
+Load breast cancer data and apply the pipeline.
+
+```{r}
+data(breast.cancer)
+breast.cancer
+```
+
+<!--
+#Select only 50 genes for testing
+#
+#```{r}
+#breast.cancer <- breast.cancer %>%
+#  filter(gene %in% levels(gene)[1:50]) %>%
+#  droplevels()
+#```
+-->
+
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
+screening.output <- stochprofIC.screening(
+                d = breast.cancer, # Working dataset
+                expr = "TPM", # Name of the column containing the expression variable
+                gene = "gene",  # Name of the column containing the gene variable
+                type = "type", # Name of the column containing the type variable
+                covariates = "biopsy", # Name(s) of the column(s) containing the covariates to be included
+                #re = NA,   # not implemented yet, refers to Random Effects
+                log = FALSE, # Whether to log the expression in the screening gamlss call
+                add1 = FALSE,  # Whether to add +1 to the expression in the screening gamlss call
+                trim = 3, # Number of values to be trimmed in the screening gamlss call
+                zeros = TRUE, # Whether to change the value of zero in expr in the screening gamlss call
+                zero.value = NA#, # Value to substitute the zero in expr in the screening gamlss call
+                #re.placement = "both") # Not yet implemented, refers to Random Effects
+)
+```
+
+```{r}
+screening.output
+```
+
+This is correctly returning the first part of the pipeline (screening).
+
+It returns the genes that pass Sidak correction, as well as the sigma type estimates ("Estimate") from GAMLSS. It also returns a list with gene names that did not converge.
+
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
+testing.output <- stochprofIC.testing(d = breast.cancer, # Working dataset
+                                       expr = "TPM", # Name of the column containing the expression variable
+                                       gene = "gene", # Name of the column containing the gene variable
+                                       type = "type", # Name of the column containing the type variable
+                                       covariates = "biopsy", # Name(s) of the column(s) containing the covariates to be included
+                                       re = NA,   # not implemented yet, refers to Random Effects
+                                       log = TRUE, # Wether to log the expression in the testing gamlss call
+                                       add1 = TRUE, # Wether to add +1 to the expression in the testing gamlss call
+                                       trim = NA, # Number of values to be trimmed in the testing gamlss call
+                                       zeros = FALSE, # Whether to change the value of zero in the testing gamlss call
+                                       zero.value = 0, # Whether to substitute the zero in the expr in the testing screening gamlss call
+                                       re.placement = "both") # Not yet implemented, refers to Random Effects
+```
+
+```{r}
+testing.output
+```
+
+This is correctly returning the second part of the pipeline (testing).
+
+It returns the genes that passes False Discovery Rate (FDR), as well as the sigma type estimates from GAMLSS.
+
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
+correcting.inferring.output <- stochprofIC.pipeline(d = breast.cancer,
+                                       expr = "TPM",
+                                       gene = "gene", 
+                                       type = "type",
+                                       covariates = "biopsy",
+                                       re = NA,   # not implemented yet
+                                       log.1st = FALSE, 
+                                       log.2nd = TRUE,
+                                       add1.1st = FALSE, 
+                                       add1.2nd = TRUE,
+                                       trim.1st = 3, 
+                                       trim.2nd = NA,
+                                       zeros.1st = TRUE, zeros.2nd = FALSE,
+                                       zero.value.1st = NA, zero.value.2nd = 0,
+                                       re.placement = "both")
+```
+
+```{r}
+correcting.inferring.output
+```
+
+This is correctly returning the last part of the pipeline (correcting&inferring).
+
+It returns a list with three objects:
+
+- All the GAMLSS estimates from the final selected genes ('Coefficients')
+- The corrected output data together with the non-corrected (TPM), for comparison ('Corrected output'). This output can be used for subsequent analyses (e.g. stochprofML).
+- A list of genes with errors, meaning that no GAMLSS output is provided due to non-conversion of the model.
+
+```{r}
+correcting.inferring.output$`Corrected output`
+correcting.inferring.output$`Coefficients`
+```
+
+If we want to save the full output of the stochprofIC.pipeline:
+
+```{r, echo = TRUE, results = "hide", warning = FALSE, message = FALSE, error = FALSE}
+full.output <- stochprofIC.pipeline(d = breast.cancer,
+                                    expr = "TPM",
+                                    type = "type",
+                                    covariates = "biopsy",
+                                    gene = "gene")
+```
+
+```{r}
+full.output$Coefficients
+full.output$Corrected
+full.output$`Genes with error`
+```
+

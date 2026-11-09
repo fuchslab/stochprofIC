@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Mercè Garí" />
+
+
+<title>stochprofIC: Example on data analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">stochprofIC: Example on data analysis</h1>
+<h4 class="author">Mercè Garí</h4>
+<h4 class="date">01/10/2024 - Version 0.3.5</h4>
+
+
+
+<p>Load breast cancer data and apply the pipeline.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(breast.cancer)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>breast.cancer</span></code></pre></div>
+<pre><code>## # A tibble: 12,000 × 5
+##    sample         gene   type    biopsy     TPM
+##    &lt;fct&gt;          &lt;fct&gt;  &lt;fct&gt;   &lt;fct&gt;    &lt;dbl&gt;
+##  1 BCC2.Control01 TSPAN6 Control BCC2     2.16 
+##  2 BCC2.Control02 TSPAN6 Control BCC2    17.0  
+##  3 BCC2.Control03 TSPAN6 Control BCC2    51.2  
+##  4 BCC2.Control04 TSPAN6 Control BCC2     8.92 
+##  5 BCC2.Control05 TSPAN6 Control BCC2   138.   
+##  6 BCC2.Control06 TSPAN6 Control BCC2     7.10 
+##  7 BCC2.Control07 TSPAN6 Control BCC2    55.0  
+##  8 BCC2.Control08 TSPAN6 Control BCC2     0.688
+##  9 BCC2.Control09 TSPAN6 Control BCC2     6.67 
+## 10 BCC2.Control10 TSPAN6 Control BCC2     4.35 
+## # ℹ 11,990 more rows</code></pre>
+<!--
+#Select only 50 genes for testing
+#
+#```{r}
+#breast.cancer <- breast.cancer %>%
+#  filter(gene %in% levels(gene)[1:50]) %>%
+#  droplevels()
+#```
+-->
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>screening.output <span class="ot">&lt;-</span> <span class="fu">stochprofIC.screening</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                <span class="at">d =</span> breast.cancer, <span class="co"># Working dataset</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                <span class="at">expr =</span> <span class="st">&quot;TPM&quot;</span>, <span class="co"># Name of the column containing the expression variable</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                <span class="at">gene =</span> <span class="st">&quot;gene&quot;</span>,  <span class="co"># Name of the column containing the gene variable</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                <span class="at">type =</span> <span class="st">&quot;type&quot;</span>, <span class="co"># Name of the column containing the type variable</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                <span class="at">covariates =</span> <span class="st">&quot;biopsy&quot;</span>, <span class="co"># Name(s) of the column(s) containing the covariates to be included</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                <span class="co">#re = NA,   # not implemented yet, refers to Random Effects</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                <span class="at">log =</span> <span class="cn">FALSE</span>, <span class="co"># Whether to log the expression in the screening gamlss call</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                <span class="at">add1 =</span> <span class="cn">FALSE</span>,  <span class="co"># Whether to add +1 to the expression in the screening gamlss call</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                <span class="at">trim =</span> <span class="dv">3</span>, <span class="co"># Number of values to be trimmed in the screening gamlss call</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                <span class="at">zeros =</span> <span class="cn">TRUE</span>, <span class="co"># Whether to change the value of zero in expr in the screening gamlss call</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                <span class="at">zero.value =</span> NA<span class="co">#, # Value to substitute the zero in expr in the screening gamlss call</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                <span class="co">#re.placement = &quot;both&quot;) # Not yet implemented, refers to Random Effects</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>screening.output</span></code></pre></div>
+<pre><code>## $Screening
+##       gene Variable  Estimate         Pval   Pval.sidak
+## 1     ALS2   type.1 0.7496900 1.622588e-07 7.301618e-06
+## 2   ANKIB1   type.1 0.7681677 1.074069e-06 4.833196e-05
+## 3     AOC1   type.1 1.8324184 8.496435e-10 3.823396e-08
+## 4      BAD   type.1 0.6508605 2.276318e-07 1.024338e-05
+## 5      CFH   type.1 3.6087662 3.210572e-09 1.444757e-07
+## 6     DPM1   type.1 0.7212401 1.460134e-06 6.570393e-05
+## 7     GCLC   type.1 0.4470174 5.518665e-05 2.480386e-03
+## 8    LASP1   type.1 0.4210719 1.399695e-04 6.279272e-03
+## 9  NDUFAF7   type.1 0.6919697 2.572429e-09 1.157593e-07
+## 10    NFYA   type.1 1.4636167 7.828478e-06 3.522208e-04
+## 11  NIPAL3   type.1 0.5277048 1.275974e-05 5.740274e-04
+## 12   SNX11   type.1 0.7450075 2.424080e-10 1.090836e-08
+## 
+## $`Genes with error`
+## [1] &quot;KLHL13&quot; &quot;MYH16&quot;  &quot;RAD52&quot;  &quot;TNMD&quot;   &quot;WNT16&quot;</code></pre>
+<p>This is correctly returning the first part of the pipeline
+(screening).</p>
+<p>It returns the genes that pass Sidak correction, as well as the sigma
+type estimates (“Estimate”) from GAMLSS. It also returns a list with
+gene names that did not converge.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>testing.output <span class="ot">&lt;-</span> <span class="fu">stochprofIC.testing</span>(<span class="at">d =</span> breast.cancer, <span class="co"># Working dataset</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                       <span class="at">expr =</span> <span class="st">&quot;TPM&quot;</span>, <span class="co"># Name of the column containing the expression variable</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                                       <span class="at">gene =</span> <span class="st">&quot;gene&quot;</span>, <span class="co"># Name of the column containing the gene variable</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                                       <span class="at">type =</span> <span class="st">&quot;type&quot;</span>, <span class="co"># Name of the column containing the type variable</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                                       <span class="at">covariates =</span> <span class="st">&quot;biopsy&quot;</span>, <span class="co"># Name(s) of the column(s) containing the covariates to be included</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                       <span class="at">re =</span> <span class="cn">NA</span>,   <span class="co"># not implemented yet, refers to Random Effects</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                                       <span class="at">log =</span> <span class="cn">TRUE</span>, <span class="co"># Wether to log the expression in the testing gamlss call</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                                       <span class="at">add1 =</span> <span class="cn">TRUE</span>, <span class="co"># Wether to add +1 to the expression in the testing gamlss call</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>                                       <span class="at">trim =</span> <span class="cn">NA</span>, <span class="co"># Number of values to be trimmed in the testing gamlss call</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                                       <span class="at">zeros =</span> <span class="cn">FALSE</span>, <span class="co"># Whether to change the value of zero in the testing gamlss call</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>                                       <span class="at">zero.value =</span> <span class="dv">0</span>, <span class="co"># Whether to substitute the zero in the expr in the testing screening gamlss call</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>                                       <span class="at">re.placement =</span> <span class="st">&quot;both&quot;</span>) <span class="co"># Not yet implemented, refers to Random Effects</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>testing.output</span></code></pre></div>
+<pre><code>## $Testing
+##      gene Variable  Estimate         Pval     Pval.fdr
+## 1    DPM1   type.1 0.3178770 7.046708e-04 4.228025e-03
+## 2   LASP1   type.1 0.2448128 8.740415e-03 2.622125e-02
+## 3 NDUFAF7   type.1 0.4689880 8.255207e-07 9.906249e-06
+## 4   SNX11   type.1 0.2619897 5.062139e-03 2.024856e-02
+## 
+## $`Genes with error`
+## [1] &quot;KLHL13&quot; &quot;MYH16&quot;  &quot;RAD52&quot;  &quot;TNMD&quot;   &quot;WNT16&quot;</code></pre>
+<p>This is correctly returning the second part of the pipeline
+(testing).</p>
+<p>It returns the genes that passes False Discovery Rate (FDR), as well
+as the sigma type estimates from GAMLSS.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>correcting.inferring.output <span class="ot">&lt;-</span> <span class="fu">stochprofIC.pipeline</span>(<span class="at">d =</span> breast.cancer,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                                       <span class="at">expr =</span> <span class="st">&quot;TPM&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                       <span class="at">gene =</span> <span class="st">&quot;gene&quot;</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                                       <span class="at">type =</span> <span class="st">&quot;type&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                                       <span class="at">covariates =</span> <span class="st">&quot;biopsy&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                                       <span class="at">re =</span> <span class="cn">NA</span>,   <span class="co"># not implemented yet</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                                       <span class="at">log.1st =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                                       <span class="at">log.2nd =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>                                       <span class="at">add1.1st =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>                                       <span class="at">add1.2nd =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>                                       <span class="at">trim.1st =</span> <span class="dv">3</span>, </span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>                                       <span class="at">trim.2nd =</span> <span class="cn">NA</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>                                       <span class="at">zeros.1st =</span> <span class="cn">TRUE</span>, <span class="at">zeros.2nd =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>                                       <span class="at">zero.value.1st =</span> <span class="cn">NA</span>, <span class="at">zero.value.2nd =</span> <span class="dv">0</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>                                       <span class="at">re.placement =</span> <span class="st">&quot;both&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>correcting.inferring.output</span></code></pre></div>
+<pre><code>## $Coefficients
+## # A tibble: 40 × 4
+##    gene  Variable   Part  Estimate
+##    &lt;fct&gt; &lt;fct&gt;      &lt;fct&gt;    &lt;dbl&gt;
+##  1 DPM1  type       Mu      0.612 
+##  2 DPM1  biopsyBCC2 Mu      1.40  
+##  3 DPM1  biopsyBCC5 Mu      2.22  
+##  4 DPM1  biopsyBCC6 Mu      0.528 
+##  5 DPM1  biopsyBCC9 Mu      0.0301
+##  6 DPM1  type       Sigma   0.318 
+##  7 DPM1  biopsyBCC2 Sigma   0.411 
+##  8 DPM1  biopsyBCC5 Sigma   0.655 
+##  9 DPM1  biopsyBCC6 Sigma   0.326 
+## 10 DPM1  biopsyBCC9 Sigma  -0.138 
+## # ℹ 30 more rows
+## 
+## $`Corrected output`
+## # A tibble: 560 × 3
+##    gene  `Non-corrected` Corrected
+##    &lt;fct&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+##  1 DPM1             2.26     0.912
+##  2 DPM1             2.96     1.53 
+##  3 DPM1             4.36     4.27 
+##  4 DPM1             4.27     4.01 
+##  5 DPM1             4.56     4.94 
+##  6 DPM1             4.75     5.67 
+##  7 DPM1             4.05     3.39 
+##  8 DPM1             3.37     2.06 
+##  9 DPM1             3.38     2.08 
+## 10 DPM1             1.76     0.627
+## # ℹ 550 more rows
+## 
+## $`Genes with error`
+## [1] &quot;KLHL13&quot; &quot;MYH16&quot;  &quot;RAD52&quot;  &quot;TNMD&quot;   &quot;WNT16&quot;</code></pre>
+<p>This is correctly returning the last part of the pipeline
+(correcting&amp;inferring).</p>
+<p>It returns a list with three objects:</p>
+<ul>
+<li>All the GAMLSS estimates from the final selected genes
+(‘Coefficients’)</li>
+<li>The corrected output data together with the non-corrected (TPM), for
+comparison (‘Corrected output’). This output can be used for subsequent
+analyses (e.g. stochprofML).</li>
+<li>A list of genes with errors, meaning that no GAMLSS output is
+provided due to non-conversion of the model.</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>correcting.inferring.output<span class="sc">$</span><span class="st">`</span><span class="at">Corrected output</span><span class="st">`</span></span></code></pre></div>
+<pre><code>## # A tibble: 560 × 3
+##    gene  `Non-corrected` Corrected
+##    &lt;fct&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+##  1 DPM1             2.26     0.912
+##  2 DPM1             2.96     1.53 
+##  3 DPM1             4.36     4.27 
+##  4 DPM1             4.27     4.01 
+##  5 DPM1             4.56     4.94 
+##  6 DPM1             4.75     5.67 
+##  7 DPM1             4.05     3.39 
+##  8 DPM1             3.37     2.06 
+##  9 DPM1             3.38     2.08 
+## 10 DPM1             1.76     0.627
+## # ℹ 550 more rows</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>correcting.inferring.output<span class="sc">$</span><span class="st">`</span><span class="at">Coefficients</span><span class="st">`</span></span></code></pre></div>
+<pre><code>## # A tibble: 40 × 4
+##    gene  Variable   Part  Estimate
+##    &lt;fct&gt; &lt;fct&gt;      &lt;fct&gt;    &lt;dbl&gt;
+##  1 DPM1  type       Mu      0.612 
+##  2 DPM1  biopsyBCC2 Mu      1.40  
+##  3 DPM1  biopsyBCC5 Mu      2.22  
+##  4 DPM1  biopsyBCC6 Mu      0.528 
+##  5 DPM1  biopsyBCC9 Mu      0.0301
+##  6 DPM1  type       Sigma   0.318 
+##  7 DPM1  biopsyBCC2 Sigma   0.411 
+##  8 DPM1  biopsyBCC5 Sigma   0.655 
+##  9 DPM1  biopsyBCC6 Sigma   0.326 
+## 10 DPM1  biopsyBCC9 Sigma  -0.138 
+## # ℹ 30 more rows</code></pre>
+<p>If we want to save the full output of the stochprofIC.pipeline:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>full.output <span class="ot">&lt;-</span> <span class="fu">stochprofIC.pipeline</span>(<span class="at">d =</span> breast.cancer,</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                                    <span class="at">expr =</span> <span class="st">&quot;TPM&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>                                    <span class="at">type =</span> <span class="st">&quot;type&quot;</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                                    <span class="at">covariates =</span> <span class="st">&quot;biopsy&quot;</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                                    <span class="at">gene =</span> <span class="st">&quot;gene&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>full.output<span class="sc">$</span>Coefficients</span></code></pre></div>
+<pre><code>## # A tibble: 40 × 4
+##    gene  Variable   Part  Estimate
+##    &lt;fct&gt; &lt;fct&gt;      &lt;fct&gt;    &lt;dbl&gt;
+##  1 DPM1  type       Mu      0.612 
+##  2 DPM1  biopsyBCC2 Mu      1.40  
+##  3 DPM1  biopsyBCC5 Mu      2.22  
+##  4 DPM1  biopsyBCC6 Mu      0.528 
+##  5 DPM1  biopsyBCC9 Mu      0.0301
+##  6 DPM1  type       Sigma   0.318 
+##  7 DPM1  biopsyBCC2 Sigma   0.411 
+##  8 DPM1  biopsyBCC5 Sigma   0.655 
+##  9 DPM1  biopsyBCC6 Sigma   0.326 
+## 10 DPM1  biopsyBCC9 Sigma  -0.138 
+## # ℹ 30 more rows</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>full.output<span class="sc">$</span>Corrected</span></code></pre></div>
+<pre><code>## # A tibble: 560 × 3
+##    gene  `Non-corrected` Corrected
+##    &lt;fct&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+##  1 DPM1             2.26     0.912
+##  2 DPM1             2.96     1.53 
+##  3 DPM1             4.36     4.27 
+##  4 DPM1             4.27     4.01 
+##  5 DPM1             4.56     4.94 
+##  6 DPM1             4.75     5.67 
+##  7 DPM1             4.05     3.39 
+##  8 DPM1             3.37     2.06 
+##  9 DPM1             3.38     2.08 
+## 10 DPM1             1.76     0.627
+## # ℹ 550 more rows</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>full.output<span class="sc">$</span><span class="st">`</span><span class="at">Genes with error</span><span class="st">`</span></span></code></pre></div>
+<pre><code>## [1] &quot;KLHL13&quot; &quot;MYH16&quot;  &quot;RAD52&quot;  &quot;TNMD&quot;   &quot;WNT16&quot;</code></pre>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

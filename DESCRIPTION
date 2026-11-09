@@ -1,26 +1,20 @@
 Package: stochprofIC
-Title: A pipeline for generalized additive modelling of transcriptional heterogeneity for 10-cell RNA sequencing data
-Version: 0.3.5
+Title: A pipeline for generalized additive modelling of transcriptional
+        heterogeneity for 10-cell RNA sequencing data
+Version: 0.3.6
 Authors@R: 
     person("Mercè", "Garí", , "mercegari@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6903-0732"))
 Description: A pipeline to detect and parameterize transcriptional heterogeneity of 10-cell data by normalizing for a set of covariates and adjusting for technical variation to obtain corrected data.
-Depends:
-  R (>= 3.5),
-  dplyr,
-  tibble,
-  gamlss
-Imports:
-  gamlss.dist,
-  mutoss,
-  tidyselect
-Suggests:
-  knitr,
-  rmarkdown,
-  tidyverse,
-  stringr
+Depends: R (>= 3.5), dplyr, tibble, gamlss
+Imports: gamlss.dist, mutoss, tidyselect
+Suggests: knitr, rmarkdown, tidyverse, stringr
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2024-10-01 11:16:08 UTC; merce
+Author: Mercè Garí [aut, cre] (<https://orcid.org/0000-0001-6903-0732>)
+Maintainer: Mercè Garí <mercegari@gmail.com>

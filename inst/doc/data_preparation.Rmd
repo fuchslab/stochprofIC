@@ -1,0 +1,178 @@
+---
+title: "stochprofIC: Example on data preparation"
+author: "Mercè Garí"
+date: "`r format(Sys.time(), '%d/%m/%Y')` - Version `r packageVersion('stochprofIC')`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{stochprofIC: Example on data preparation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(stochprofIC)
+library(tidyverse)
+```
+
+This file contains two examples on how to transform csv data into a tidy long format data suitable for the functions in the package.
+
+The only requirement for the package is to have a dataset with the following columns (in a tidy long format, where each row refers to a single observation):
+
+- One column must refer to the gene name.
+- One column must refer to the sample name.
+- One column must refer to the type of sample (pool-and-split control vs. biological sample)
+- One column must refer to the RNA expression data in TPM (transcripts per million).
+- At least one column should include the covariate to be corrected for (such as sex, biopsy, tumor, time, etc.)
+
+The dataset does not need to have specific column names, which can be defined in the call of the functions. Examples provide columns with default names used in the function.
+
+
+## Example 1: Glioma dataset
+
+Load original data for glioma from NCBI (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147360).
+
+Rename the variable "symbol" that contains the genes into "gene" for clarity.
+
+Remove all other columns except for the "gene" variable and samples with RSEM data.
+
+```{r}
+gl <- data.table::fread("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE147360&format=file&file=GSE147360%5F2020%5F03%5F20%5Fopc%5Fallcompiled%2Ecsv%2Egz") %>%
+  rename(gene = symbol) %>%
+  mutate(gene = as.factor(gene)) %>%
+  dplyr::select(-c(ensgene, entrez, chr, start, end, strand, biotype, description))
+```
+
+Load metadata for glioma with additional information about sex, time point and type of sample. Retain only the "dpi90" samples and controls from males and females.
+
+```{r}
+meta.glioma <- read.csv("data/GSE147360-GPL19057_series_matrix.txt",
+                        skip=29, sep="\t") %>%
+  filter(X.Sample_title == "!Sample_characteristics_ch1") %>%
+  tibble() %>%
+  dplyr::select(-X.Sample_title) %>%
+  pivot_longer(everything(), names_to = "sample", 
+               values_to="metadata") %>%
+  filter(!str_detect(metadata, "^genotype")) %>%
+  filter(!str_detect(metadata, "^section")) %>%
+  mutate(sex = case_when(
+    metadata == "Sex: female" ~ "female", 
+    metadata == "Sex: male" ~ "male",
+    TRUE ~ NA_character_)) %>%
+  mutate(time = case_when(
+    metadata == "time: 12 dpi (days following tamoxifen treatment start)" ~ "dpi12",
+    metadata == "time: 90 dpi (days following tamoxifen treatment start)" ~ "dpi90",
+    TRUE ~ NA_character_)) %>%
+  mutate(type = case_when(
+    metadata == "sample type: 10-cell sample" ~ "sample",
+    metadata == "sample type: pool-and-split control" ~ "control",
+    TRUE ~ NA_character_)) %>%
+  dplyr::select(-metadata) %>%
+  pivot_longer(-sample, names_to="variable", values_to = "values") %>%
+  filter(!is.na(values)) %>%
+  pivot_wider(names_from = "variable", values_from = "values") %>%
+  mutate(id = str_sub(sample, 1, 8)) %>%
+  filter(time %in% "dpi90") %>%
+  dplyr::select(-time)
+```
+
+Create a long format tidy dataset, create specific variables from sample names (e.g. sex, type of sample), remove observations containing mitochondrial (MT) genes and ERCCs, and normalize RSEM to TPM for each sample, grouped by sample.
+
+In addition, select only the 90-day time point (dpi90) for analysis.
+
+```{r, message=FALSE}
+glioma <- gl %>%
+  pivot_longer(-gene, names_to = "id", values_to = "RSEM") %>%
+  mutate(id = str_replace(id, "-", ".")) %>%
+  left_join(meta.glioma) %>%
+  filter(!is.na(sample)) %>%
+  dplyr::select(sample, gene, type, sex, RSEM) %>%
+  mutate(sample = as.factor(sample),
+         type = as.factor(type),
+         sex = as.factor(sex)) %>%
+  filter(!grepl('^mt-', gene)) %>%
+  filter(!grepl('^ERCC-', gene)) %>%
+  group_by(sample) %>%
+  mutate(TPM = (RSEM / sum(RSEM) * 1e6)) %>%
+  ungroup() %>%
+  dplyr::select(sample, gene, type, sex, TPM)
+```
+
+The created object (glioma) is the same one that it is called using `data(glioma)`.
+The final format of this object contains the following elements: 
+
+- **sample**: Identifies the sample name.
+- **gene**: This variable should contain the name of the gene.
+- **type**: Identifies the type of sample.
+- **sex**: This variable indicates the sex of the mice for adjustment.
+- **TPM**: Transcripts per million (TPM) expression data.
+
+
+```{r}
+glioma
+```
+
+Save the tidy dataset in the long format for subsequent steps.
+
+```{r, echo = TRUE, eval = FALSE}
+#save(glioma, file="data/glioma-data-ready-to-pipeline.RData")
+```
+
+
+## Example 2: Breast cancer dataset
+
+### Original data
+
+Load original data for breast cancer from NCBI (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147356).
+
+Rename the variable "symbol" that contains the genes into "gene" for clarity.
+
+Remove all other columns except for the "gene" variable and samples with RSEM data.
+
+```{r}
+bc <- data.table::fread("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE147356&format=file&file=GSE147356%5F2020%5F02%5F06%5Fbreastcancer%5Fallcompiled%2Ecsv%2Egz") %>%
+  rename(gene = symbol) %>%
+  mutate(gene = as.factor(gene)) %>%
+  dplyr::select(-c(ensgene, entrez, chr, start, end, 
+                   strand, biotype, description))
+```
+
+Create a long format tidy dataset, create specific variables from sample names (e.g. biopsy, type of sample), remove observations containing mitochondrial (MT) genes and ERCCs, and normalize RSEM to TPM for each sample grouped by sample.
+
+```{r}
+breast.cancer <- bc %>%
+  pivot_longer(-gene, names_to = "sample", values_to = "RSEM") %>%
+  mutate(sample = as.factor(sample)) %>%
+  mutate(temp = sample) %>%
+  separate_wider_delim(cols = temp, delim = ".", 
+                       names=c("biopsy", "type")) %>%
+  mutate(type = str_replace(type, "[:digit:]+", "")) %>%
+  mutate(biopsy = as.factor(biopsy),
+         type = as.factor(type)) %>%
+  filter(!grepl('^mt-', gene)) %>%
+  filter(!grepl('^ERCC-', gene)) %>%
+  group_by(sample) %>%
+  mutate(TPM = (RSEM / sum(RSEM) * 1e6)) %>%
+  ungroup() %>%
+  dplyr::select(sample, gene, type, biopsy, TPM)
+```
+
+The created object (breast.cancer) is the same one that it is called using `data(breast.cancer)`.
+The final format of this object contains the following elements: 
+
+- **sample**: Identifies the sample name.
+- **gene**: This variable should contain the name of the gene.
+- **type**: Identifies the type of sample.
+- **biopsy**: This variable indicates the batches from the five types of cancer.
+- **TPM**: Transcripts per million (TPM) expression data.
+
+
+```{r}
+breast.cancer
+```
+
+Save the tidy dataset in the long format for subsequent steps.
+
+```{r, echo = TRUE, eval = FALSE}
+#save(breast.cancer, file="data/breast-cancer-data-ready-to-pipeline.RData")
+```
